@@ -1,0 +1,42 @@
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+#stage {
+  position: absolute;
+  top: 60px;
+  left: 10px;
+  width: calc(100% - 20px);
+  height: calc(100% - 120px);
+}
+
+#title {
+  text-align: center;
+  margin-left: 5px;
+  margin-right: 5px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+#speed-slider {
+  display: block;
+  position: absolute;
+  bottom: 15px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 5px 0;
+  vertical-align: middle;
+}
+
+#speed-slider::-ms-tooltip {
+  display: none;
+}
+
