@@ -7,5 +7,7 @@ class Star extends Actor {
   Star(World world, int x, int y) : super(world, x, y);
 
   @override
-  String get imageName => 'star';
+  BitmapData get image {
+    return world.resourceManager.getBitmapData('star');
+  }
 }

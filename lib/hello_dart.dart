@@ -26,9 +26,9 @@ part 'translations/messages_de.dart';
 ///
 /// Possible characters:
 /// * boy
-/// * cat-girl
-/// * star-girl
-/// * pink-girl
+/// * catgirl
+/// * stargirl
+/// * pinkgirl
 String character = 'boy';
 
 /// The translated messages.

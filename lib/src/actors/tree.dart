@@ -8,5 +8,7 @@ class Tree extends Actor {
   Tree(World world, int x, int y) : super(world, x, y);
 
   @override
-  String get imageName => 'tree';
+  BitmapData get image {
+    return world.resourceManager.getBitmapData('tree');
+  }
 }

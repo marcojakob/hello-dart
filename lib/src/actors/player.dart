@@ -41,16 +41,14 @@ abstract class Player extends Actor {
         Point playerEndPoint = new Point(x, y);
 
         // Copy the current box image name and the player's direction.
-        String boxImageName = box.imageName;
+        var boxImage = box.image;
         int playerDirection = direction;
 
         world.queueAction((spd) {
           AnimationGroup animGroup = new AnimationGroup();
-          animGroup.add(box._bitmap.moveAnimation(boxStartPoint, boxEndPoint,
-                                                  playerDirection, spd));
-          animGroup.add(box._bitmap.delayedUpdateImage(boxImageName, spd));
-          animGroup.add(_bitmap.moveAnimation(playerStartPoint, playerEndPoint,
-                                              playerDirection, spd));
+          animGroup.add(box._bitmapMoveAnimation(boxEndPoint, spd));
+          animGroup.add(box._bitmapDelayedUpdate(boxImage, spd));
+          animGroup.add(_bitmapMoveAnimation(playerEndPoint, spd));
 
           world.juggler.add(animGroup);
         });
@@ -70,8 +68,7 @@ abstract class Player extends Actor {
       int playerDirection = direction;
 
       world.queueAction((spd) {
-        world.juggler.add(_bitmap.moveAnimation(playerStartPoint, playerEndPoint,
-                                                playerDirection, spd));
+        world.juggler.add(_bitmapMoveAnimation(playerEndPoint, spd));
       });
     }
   }
@@ -80,9 +77,10 @@ abstract class Player extends Actor {
   void turnLeft() {
     direction = (direction - 90) % 360;
 
+    var bitmapCopy = image;
+
     world.queueAction((spd) {
-      Animatable anim = _bitmap.turnByAnimation(-math.PI / 2, spd);
-      world.juggler.add(anim);
+      world.juggler.add(_bitmapDelayedUpdate(bitmapCopy, spd));
     });
   }
 
@@ -90,8 +88,10 @@ abstract class Player extends Actor {
   void turnRight() {
     direction = (direction + 90) % 360;
 
+    var bitmapCopy = image;
+
     world.queueAction((spd) {
-      world.juggler.add(_bitmap.turnByAnimation(math.PI / 2, spd));
+      world.juggler.add(_bitmapDelayedUpdate(bitmapCopy, spd));
     });
   }
 
@@ -102,7 +102,7 @@ abstract class Player extends Actor {
       world.actors.add(star);
 
       world.queueAction((spd) {
-        star._addToWorld();
+        star._bitmapAddToWorld();
       });
     } else {
       world.queueAction((spd) {
@@ -121,7 +121,7 @@ abstract class Player extends Actor {
       world.actors.remove(star);
 
       world.queueAction((spd) {
-        star._removeFromWorld();
+        star._bitmapRemoveFromWorld();
       });
     } else {
       world.queueAction((spd) {
@@ -157,12 +157,41 @@ abstract class Player extends Actor {
   }
 
   @override
-  String get imageName => character;
+  BitmapData get image {
+    return world.resourceManager.getTextureAtlas(character)
+        .getBitmapData(directionName);
+  }
 
   /// Stops the execution.
   void _stop() {
     // We throw an exception here because it is the only way to immediately
     // leave an executing method.
     throw new StopException();
+  }
+
+  @override
+  Animatable _bitmapMoveAnimation(Point targetPoint, Duration speed) {
+    AnimationGroup animGroup = new AnimationGroup();
+
+    // Add move animation from Actor.
+    animGroup.add(super._bitmapMoveAnimation(targetPoint, speed));
+
+//    // Create walking player.
+//    FlipBook flipBook = new FlipBook(world.resourceManager.getTextureAtlas('boy').getBitmapDatas('boy-right'),
+//            world.stage.frameRate, false)
+//            ..x = x
+//            ..y = y
+//            ..mouseEnabled = false;
+//
+//    animGroup.add(new DelayedCall(() {
+//      flipBook.play();
+//      flipBook.addTo(layer);
+//    }, 0));
+//
+//    flipBook.onComplete.listen((e) => flipBook.removeFromParent());
+//
+//    stage.juggler.add(flipBook);
+
+    return animGroup;
   }
 }

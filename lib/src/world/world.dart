@@ -139,7 +139,7 @@ class World extends Sprite {
       addChild(_playerLayer);
 
       // Add actors.
-      actors.forEach((actor) => actor._addToWorld());
+      actors.forEach((actor) => actor._bitmapAddToWorld());
 
       // Execute the user's start()-method. This will fill the action queue.
       try {
@@ -199,10 +199,11 @@ class World extends Sprite {
   Future _loadAssets() {
     resourceManager
         ..addBitmapData('field', '${assetDir}/images/field.png')
-        ..addBitmapData('boy', '${assetDir}/images/boy.png')
         ..addBitmapData('star', '${assetDir}/images/star.png')
         ..addBitmapData('box', '${assetDir}/images/box.png')
-        ..addBitmapData('tree', '${assetDir}/images/tree.png');
+        ..addBitmapData('tree', '${assetDir}/images/tree.png')
+        ..addTextureAtlas(character, '${assetDir}/images/${character}.json',
+            TextureAtlasFormat.JSONARRAY);
 
     return resourceManager.load();
   }

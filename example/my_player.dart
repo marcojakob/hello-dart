@@ -4,6 +4,11 @@ import 'package:hello_dart/hello_dart.dart';
 class MyPlayer extends Player {
 
   void start() {
+    turnLeft();
+    turnLeft();
+    move();
+    turnLeft();
+    move();
     // move();
   }
 }
