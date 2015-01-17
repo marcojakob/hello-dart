@@ -93,12 +93,11 @@ abstract class Actor {
   void _bitmapRemoveFromWorld() {
     if (_bitmap != null) {
       _bitmap.removeFromParent();
-      _bitmap = null;
     }
   }
 
   /// Creates a move animation to the [targetPoint] with the specified [speed].
-  Animatable _bitmapMoveAnimation(Point targetPoint, Duration speed) {
+  Animatable _bitmapMoveAnimation(Point targetPoint, String directionName, Duration speed) {
     Point targetPixel = World.cellToPixel(targetPoint.x, targetPoint.y);
 
     return new Tween(_bitmap, speed.inMilliseconds / 1000,

@@ -42,13 +42,13 @@ abstract class Player extends Actor {
 
         // Copy the current box image name and the player's direction.
         var boxImage = box.image;
-        int playerDirection = direction;
+        String directionNameCopy = directionName;
 
         world.queueAction((spd) {
           AnimationGroup animGroup = new AnimationGroup();
-          animGroup.add(box._bitmapMoveAnimation(boxEndPoint, spd));
+          animGroup.add(box._bitmapMoveAnimation(boxEndPoint, directionNameCopy, spd));
           animGroup.add(box._bitmapDelayedUpdate(boxImage, spd));
-          animGroup.add(_bitmapMoveAnimation(playerEndPoint, spd));
+          animGroup.add(_bitmapMoveAnimation(playerEndPoint, directionNameCopy, spd));
 
           world.juggler.add(animGroup);
         });
@@ -65,10 +65,10 @@ abstract class Player extends Actor {
       Point playerStartPoint = new Point(x, y);
       _move(direction);
       Point playerEndPoint = new Point(x, y);
-      int playerDirection = direction;
+      String directionNameCopy = directionName;
 
       world.queueAction((spd) {
-        world.juggler.add(_bitmapMoveAnimation(playerEndPoint, spd));
+        world.juggler.add(_bitmapMoveAnimation(playerEndPoint, directionNameCopy, spd));
       });
     }
   }
@@ -170,28 +170,40 @@ abstract class Player extends Actor {
   }
 
   @override
-  Animatable _bitmapMoveAnimation(Point targetPoint, Duration speed) {
-    AnimationGroup animGroup = new AnimationGroup();
+  Animatable _bitmapMoveAnimation(Point targetPoint, String directionName,
+                                  Duration speed) {
+    AnimationChain animChain = new AnimationChain();
 
-    // Add move animation from Actor.
-    animGroup.add(super._bitmapMoveAnimation(targetPoint, speed));
+    // Remove bitmap.
+    animChain.add(new DelayedCall(() {
+      _bitmapRemoveFromWorld();
+    }, 0));
 
-//    // Create walking player.
-//    FlipBook flipBook = new FlipBook(world.resourceManager.getTextureAtlas('boy').getBitmapDatas('boy-right'),
-//            world.stage.frameRate, false)
-//            ..x = x
-//            ..y = y
-//            ..mouseEnabled = false;
-//
-//    animGroup.add(new DelayedCall(() {
-//      flipBook.play();
-//      flipBook.addTo(layer);
-//    }, 0));
-//
-//    flipBook.onComplete.listen((e) => flipBook.removeFromParent());
-//
-//    stage.juggler.add(flipBook);
+    // Create walking player.
+    FlipBook flipBook = new FlipBook(
+        world.resourceManager.getTextureAtlas(character).getBitmapDatas(directionName),
+            5, true)
+            ..x = _bitmap.x
+            ..y = _bitmap.y
+            ..mouseEnabled = false
+            ..play()
+            ..addTo(layer);
 
-    return animGroup;
+    Point targetPixel = World.cellToPixel(targetPoint.x, targetPoint.y);
+
+    animChain.add(new Tween(flipBook, speed.inMilliseconds / 1000,
+        TransitionFunction.easeInOutQuadratic)
+      ..animate.x.to(targetPixel.x)
+      ..animate.y.to(targetPixel.y)
+      ..onComplete = () {
+        flipBook.removeFromParent();
+
+        // Add bitmap again.
+        _bitmap.x = targetPixel.x;
+        _bitmap.y = targetPixel.y;
+        _bitmapAddToWorld();
+    });
+
+    return animChain;
   }
 }
