@@ -29,7 +29,7 @@ part 'translations/messages_de.dart';
 /// * catgirl
 /// * stargirl
 /// * pinkgirl
-String character = 'catgirl';
+String character = 'boy';
 
 /// The translated messages.
 ///

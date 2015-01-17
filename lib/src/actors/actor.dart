@@ -81,8 +81,7 @@ abstract class Actor {
       _bitmap = new Bitmap(image);
       _bitmap
           ..x = coords.x
-          ..y = coords.y
-          ..rotation = directionRadian;
+          ..y = coords.y;
     }
 
     // Add to the layer for this actor type.
@@ -97,7 +96,8 @@ abstract class Actor {
   }
 
   /// Creates a move animation to the [targetPoint] with the specified [speed].
-  Animatable _bitmapMoveAnimation(Point targetPoint, String directionName, Duration speed) {
+  Animatable _bitmapMoveAnimation(Point startPoint, Point targetPoint, String directionName, 
+                                  Duration speed) {
     Point targetPixel = World.cellToPixel(targetPoint.x, targetPoint.y);
 
     return new Tween(_bitmap, speed.inMilliseconds / 1000,
@@ -106,25 +106,27 @@ abstract class Actor {
       ..animate.y.to(targetPixel.y);
   }
 
-  /// Sets the direction to [direction], in degrees.
-  Animatable _bitmapSetDirection(int direction, Duration speed) {
-    Tween anim = new Tween(_bitmap, speed.inMilliseconds / 1000,
-        TransitionFunction.easeInOutQuadratic);
-//      ..animate.rotation.by(deltaValue);
-
-    return anim;
-  }
-
-  /// Updates the bitmap image to the specified [newImage].
-  void _bitmapUpdate(BitmapData newImage) {
-    _bitmap.bitmapData = newImage;
-  }
-
   /// Creates a [DelayedCall] to update the image.
-  DelayedCall _bitmapDelayedUpdate(BitmapData newImage, Duration speed) {
-    return new DelayedCall(() {
-      _bitmapUpdate(newImage);
-    }, speed.inMilliseconds / 1500);
+  Animatable _bitmapDelayedUpdate(BitmapData newImage, Duration speed) {
+    var animGroup = new AnimationGroup();
+    
+    animGroup.add(new Tween(_bitmap, speed.inMilliseconds / 1000)
+      ..animate.alpha.to(0));
+    
+    Bitmap newBitmap = new Bitmap(newImage)
+      ..x = _bitmap.x
+      ..y = _bitmap.y
+      ..alpha = 0
+      ..addTo(layer);
+    
+    animGroup.add(new Tween(newBitmap, speed.inMilliseconds / 1000)
+      ..animate.alpha.to(1)
+      ..onComplete = () {
+        _bitmap.removeFromParent();
+        _bitmap = newBitmap;
+      });
+    
+    return animGroup;
   }
 }
 

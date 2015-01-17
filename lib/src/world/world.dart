@@ -295,11 +295,12 @@ class World extends Sprite {
       num currentTime = juggler.elapsedTime * 1000;
 
       if (currentTime > _nextActionTime) {
-        _nextActionTime = currentTime + speed.inMilliseconds;
+        _nextActionTime = currentTime + speed.inMilliseconds + 10;
 
         PlayerAction action = _actionQueue.removeFirst();
         try {
-          action(speed);
+          Animatable actionAnim = action(speed);
+          juggler.add(actionAnim);
         } on PlayerException catch(e) {
           // Show the exception to the user.
           html.window.alert(e.toString());
@@ -352,5 +353,5 @@ class World extends Sprite {
 }
 
 /// The type for a [Player] action function.
-typedef void PlayerAction(Duration speed);
+typedef Animatable PlayerAction(Duration speed);
 
