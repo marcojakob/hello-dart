@@ -31,15 +31,15 @@ class World extends Sprite {
   /// A list of all actors except the player (stars, boxes and trees).
   List<Actor> actors;
 
-  /// The background tiles.
-  List<Tile> tiles;
+  /// The background fields.
+  List<Field> fields;
 
   int _widthInCells;
 
   /// The world width in number of cells.
   int get widthInCells {
     if (_widthInCells == null) {
-      _calcWidthAndHeight();
+      _initWidthAndHeight();
     }
     return _widthInCells;
   }
@@ -49,17 +49,19 @@ class World extends Sprite {
   /// The world height in number of rows.
   int get heightInCells {
     if (_heightInCells == null) {
-      _calcWidthAndHeight();
+      _initWidthAndHeight();
     }
     return _heightInCells;
   }
 
-  void _calcWidthAndHeight() {
+  /// Initializes the [widthInCells] and [heightInCells] depending on the
+  /// [fields].
+  void _initWidthAndHeight() {
     int maxX = 0;
     int maxY = 0;
-    tiles.forEach((tile) {
-      maxX = math.max(maxX, tile.x);
-      maxY = math.max(maxY, tile.y);
+    fields.forEach((field) {
+      maxX = math.max(maxX, field.x);
+      maxY = math.max(maxY, field.y);
     });
 
     _widthInCells = maxX + 1;
@@ -109,7 +111,7 @@ class World extends Sprite {
     // Init the scenario title.
     _initTitle();
 
-    // Init actors and background tiles.
+    // Init actors and background fields.
     scenario.build(this);
 
     // Init the stage.
@@ -165,6 +167,67 @@ class World extends Sprite {
     });
   }
 
+  /// Renders the current world state with [actors] and [player].
+  ///
+  /// Note: The rendering is not done immediately. The current world state is
+  /// added to a queue where itmes are rendered with a fixed delay between them.
+  void queueAction(PlayerAction action) {
+    // Add the current world state at the end of the queue.
+    _actionQueue.add(action);
+
+    if (_actionQueue.length > maxActions) {
+      // The maximum number of actions during one act()-call has been reached.
+      throw new ActionOverflowException(messages.actionOverflowException());
+    }
+  }
+
+  /// Returns the field at the specified location or null, if there is no field.
+  Field getFieldAt(int x, int y) {
+    return fields.firstWhere((field) => field.x == x && field.y == y,
+        orElse: () => null);
+  }
+
+
+  /// Returns the field that is a number of [steps] away from [x], [y]
+  /// in the specified [direction].
+  Field getFieldInFront(int x, int y, Direction direction, [int steps = 1]) {
+    Point p = _getPointInFront(x, y, direction, steps);
+
+    return getFieldAt(p.x, p.y);
+  }
+
+  /// Returns a list of actors at the specified location.
+  List<Actor> getActorsAt(int x, int y) {
+    return actors.where((Actor actor) => actor.x == x && actor.y == y)
+        .toList(growable: false);
+  }
+
+  /// Returns a list of actors that are a number of [steps] away from [x], [y]
+  /// in the specified [direction].
+  List<Actor> getActorsInFront(int x, int y, Direction direction, [int steps = 1]) {
+    Point p = _getPointInFront(x, y, direction, steps);
+
+    return getActorsAt(p.x, p.y);
+  }
+
+  /// Returns the point that is a number of [steps] away from [x], [y] in
+  /// the specified [direction].
+  Point _getPointInFront(int x, int y, Direction direction, [int steps = 1]) {
+    switch (direction) {
+      case Direction.right:
+        return new Point(x + steps, y);
+      case Direction.down:
+        return new Point(x, y + steps);
+      case Direction.left:
+        return new Point(x - steps, y);
+      case Direction.up:
+        return new Point(x, y - steps);
+    }
+
+    // Should never get here.
+    return null;
+  }
+
   /// Initializes the scenario title.
   void _initTitle() {
     // Create the title element and add it to the html body element.
@@ -210,9 +273,9 @@ class World extends Sprite {
 
   /// Draws the worlds background.
   void _drawBackground() {
-    tiles.forEach((tile) {
-      var coords = cellToPixel(tile.x, tile.y);
-      var tileBitmap = new Bitmap(resourceManager.getBitmapData(tile.imageName));
+    fields.forEach((field) {
+      var coords = cellToPixel(field.x, field.y);
+      var tileBitmap = new Bitmap(field.image);
       tileBitmap
           ..x = coords.x
           ..y = coords.y;
@@ -280,13 +343,6 @@ class World extends Sprite {
     return ((math.log(value) - minValue) / scale + minSlider).round();
   }
 
-  /// Translates a cell coordinate into pixel.
-  static Point cellToPixel(num x, num y) {
-    return new Point(
-        x * cellWidth,
-        y * cellHeight);
-  }
-
   /// Checks the action queue if there are actions to be executed. If there are
   /// actions, one action is executed and removed from the queue.
   void _executeNextAction() {
@@ -312,45 +368,11 @@ class World extends Sprite {
     }
   }
 
-  /// Renders the current world state with [actors] and [player].
-  ///
-  /// Note: The rendering is not done immediately. The current world state is
-  /// added to a queue where itmes are rendered with a fixed delay between them.
-  void queueAction(PlayerAction action) {
-    // Add the current world state at the end of the queue.
-    _actionQueue.add(action);
-
-    if (_actionQueue.length > maxActions) {
-      // The maximum number of actions during one act()-call has been reached.
-      throw new ActionOverflowException(messages.actionOverflowException());
-    }
-  }
-
-  /// Returns a list of actors at the specified location.
-  List<Actor> getActorsAt(int x, int y) {
-    return actors.where((Actor actor) => actor.x == x && actor.y == y)
-        .toList(growable: false);
-  }
-
-  /// Returns a list of actors that are a number of [steps] away from [x], [y]
-  /// in the specified [direction].
-  List<Actor> getActorsInFront(int x, int y, int direction, [int steps = 1]) {
-    switch (direction) {
-      case directionRight:
-        x = (x + steps) % widthInCells;
-        break;
-      case directionDown:
-        y = (y + steps) % heightInCells;
-        break;
-      case directionLeft:
-        x = (x - steps) % widthInCells;
-        break;
-      case directionUp:
-        y = (y - steps) % heightInCells;
-        break;
-    }
-
-    return getActorsAt(x, y);
+  /// Translates a cell coordinate into pixel.
+  static Point cellToPixel(num x, num y) {
+    return new Point(
+        x * cellWidth,
+        y * cellHeight);
   }
 }
 

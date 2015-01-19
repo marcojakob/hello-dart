@@ -1,9 +1,20 @@
 part of hello_dart;
 
-const int directionRight = 0;
-const int directionDown = 90;
-const int directionLeft = 180;
-const int directionUp = 270;
+/// The direction of an actor.
+enum Direction {
+  right,
+  down,
+  left,
+  up
+}
+
+/// Returns the name of the [direction].
+directionName(Direction direction) {
+  var s = direction.toString();
+  return s.substring(s.indexOf('.') + 1);
+}
+
+
 
 /// Superclass for all [Actor]s.
 abstract class Actor {
@@ -17,25 +28,16 @@ abstract class Actor {
   /// The vertical position.
   int y = 0;
 
-  /// The direction of this actor in degrees.
-  int direction = directionRight;
+  /// The direction of this actor.
+  Direction direction = Direction.right;
 
-  String get directionName {
-    switch (direction) {
-      case directionDown:
-        return 'down';
-      case directionLeft:
-        return 'left';
-      case directionUp:
-        return 'up';
-      default:
-        return 'right';
-    }
-  }
+  /// Returns the next direction when turning clockwise.
+  Direction get _nextDirectionClockwise =>
+      Direction.values[(direction.index + 1) % Direction.values.length];
 
-  /// The direction of this actor in radian.
-  num get directionRadian => _degreesToRadian(direction);
-
+  /// Returns the next direction when turning counter clockwise.
+  Direction get _nextDirectionCounterclockwise =>
+      Direction.values[(direction.index - 1) % Direction.values.length];
 
   /// The layer of the stage that this actor is added to.
   Sprite get layer => world._getLayer(this);
@@ -53,22 +55,19 @@ abstract class Actor {
   BitmapData get image;
 
   /// Moves the actor in the specified [direction].
-  ///
-  /// If the actor moves over the world's edge it will appear on the opposite
-  /// side.
-  void _move(int direction) {
+  void _move(Direction direction) {
     switch (direction) {
-      case directionRight:
-        x = (x + 1) % world.widthInCells;
+      case Direction.right:
+        x = x + 1;
         break;
-      case directionDown:
-        y = (y + 1) % world.heightInCells;
+      case Direction.down:
+        y = y + 1;
         break;
-      case directionLeft:
-        x = (x - 1) % world.widthInCells;
+      case Direction.left:
+        x = x - 1;
         break;
-      case directionUp:
-        y = (y - 1) % world.heightInCells;
+      case Direction.up:
+        y = y - 1;
         break;
     }
   }
@@ -98,7 +97,7 @@ abstract class Actor {
   /// Creates a move animation to the [targetPoint] with the specified
   /// [duration] in seconds.
   Animatable _bitmapMoveAnimation(Point startPoint, Point targetPoint,
-                                  String directionName, double duration) {
+                                  Direction direction, double duration) {
     Point targetPixel = World.cellToPixel(targetPoint.x, targetPoint.y);
 
     return new Tween(_bitmap, duration,
@@ -107,14 +106,14 @@ abstract class Actor {
       ..animate.y.to(targetPixel.y);
   }
 
-  /// Creates a turn animation from [startDirectionName] to [endDirectionName]
+  /// Creates a turn animation from [startDirection] to [endDirection]
   /// with the specified [duration] in seconds.
   ///
   /// If the bitmap was turned counterclockwise, set the [clockwise] parameter
   /// to false.
   ///
   /// Note: Unless a subclass overrides this method, no turning will be done.
-  Animatable _bitmapTurnAnimation(String startDirectionName, String endDirectionName,
+  Animatable _bitmapTurnAnimation(Direction startDirection, Direction endDirection,
                                   double duration, {clockwise: true}) {
     // Do nothing.
     return new DelayedCall(() {}, 0);

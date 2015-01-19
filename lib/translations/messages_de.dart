@@ -3,6 +3,10 @@ part of hello_dart;
 class MessagesDe extends Messages {
 
   @override
+  String cantMoveBecauseNoField() =>
+      "Der Spieler kann sich nicht bewegen, da es kein Feld mehr hat!";
+
+  @override
   String cantMoveBecauseOfTree() =>
       "Der Spieler kann sich nicht bewegen wegen einem Baum!";
 

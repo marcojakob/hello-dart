@@ -65,7 +65,7 @@ class Scenario {
       actor.y--;
     });
 
-    world.tiles.forEach((tile) {
+    world.fields.forEach((tile) {
       tile.x--;
       tile.y--;
     });
@@ -87,7 +87,7 @@ class Scenario {
               world.player
                   ..x = x
                   ..y = y
-                  ..direction = directionRight;
+                  ..direction = Direction.right;
               world.actors.add(world.player);
               playerAdded = true;
             }
@@ -111,7 +111,7 @@ class Scenario {
               world.player
                   ..x = x
                   ..y = y
-                  ..direction = directionRight;
+                  ..direction = Direction.right;
               world.actors.add(world.player);
               playerAdded = true;
             }
@@ -125,7 +125,7 @@ class Scenario {
   /// Builds the background tiles and adds them to [world].
   void _buildBackgroundTiles(World world) {
     // Reset the worlds tiles.
-    world.tiles = [];
+    world.fields = [];
 
     // 1. Calculate outline.
     List<String> outline = _findOutline();
@@ -204,7 +204,7 @@ class Scenario {
 
           // Add the tile unless there is a hole inside the polygon.
           if (positions[y][x] != Scenario.borderOrHole) {
-            world.tiles.add(new Tile(x, y));
+            world.fields.add(new Field(world, x, y));
           }
         }
       }

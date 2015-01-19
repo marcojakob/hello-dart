@@ -16,7 +16,7 @@ part 'src/actors/tree.dart';
 
 part 'src/world/world.dart';
 part 'src/world/scenario.dart';
-part 'src/world/tile.dart';
+part 'src/world/field.dart';
 part 'src/world/exceptions.dart';
 
 part 'translations/messages.dart';

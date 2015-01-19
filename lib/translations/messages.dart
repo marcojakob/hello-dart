@@ -2,6 +2,9 @@ part of hello_dart;
 
 class Messages {
 
+  String cantMoveBecauseNoField() =>
+      "The player can't move because there is no field!";
+
   String cantMoveBecauseOfTree() =>
       "The player can't move because of a tree!";
 

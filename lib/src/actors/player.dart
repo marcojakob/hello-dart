@@ -13,6 +13,14 @@ abstract class Player extends Actor {
 
   /// The player makes a step in the current direction.
   void move() {
+    // Check if there is another field in front.
+    if (!fieldFront()) {
+      world.queueAction((duration) {
+        throw new PlayerException(messages.cantMoveBecauseNoField());
+      });
+      _stop();
+    }
+
     // Check for a tree.
     if (treeFront()) {
       world.queueAction((duration) {
@@ -27,8 +35,8 @@ abstract class Player extends Actor {
 
     if (box != null) {
       // Check if the box can be pushed to the next field.
-      if (!world.getActorsInFront(x, y, direction, 2)
-          .any((Actor a) => a is Tree || a is Box)) {
+      if (world.getFieldInFront(x, y, direction, 2) != null &&
+          !world.getActorsInFront(x, y, direction, 2).any((a) => a is Tree || a is Box)) {
 
         Point boxStartPointCopy = new Point(box.x, box.y);
         Point playerStartPointCopy = new Point(x, y);
@@ -42,17 +50,17 @@ abstract class Player extends Actor {
 
         // Copy the current box image name and the player's direction.
         var boxImage = box.image;
-        String directionNameCopy = directionName;
+        Direction directionCopy = direction;
 
         world.queueAction((duration) {
           AnimationGroup animGroup = new AnimationGroup();
           animGroup.add(box._bitmapMoveAnimation(boxStartPointCopy,
                                                  boxTargetPointCopy,
-                                                 directionNameCopy, duration));
+                                                 directionCopy, duration));
           animGroup.add(box._bitmapUpdateImage(boxImage, duration));
           animGroup.add(_bitmapMoveAnimation(playerStartPointCopy,
                                              playerTargetPointCopy,
-                                             directionNameCopy, duration));
+                                             directionCopy, duration));
 
           return animGroup;
         });
@@ -71,44 +79,71 @@ abstract class Player extends Actor {
       _move(direction);
 
       Point targetPointCopy = new Point(x, y);
-      String directionNameCopy = directionName;
+      Direction directionCopy = direction;
 
       world.queueAction((duration) {
         return _bitmapMoveAnimation(startPointCopy, targetPointCopy,
-            directionNameCopy, duration);
+            directionCopy, duration);
       });
     }
   }
 
   /// The player turns left by 90 degrees.
   void turnLeft() {
-    var startDirectionName = directionName;
+    var startDirectionCopy = direction;
 
     // Change the direction.
-    direction = (direction - 90) % 360;
+    direction = _nextDirectionCounterclockwise;
 
-    var endDirectionName = directionName;
+    var endDirectionCopy = direction;
 
     world.queueAction((duration) {
-      return _bitmapTurnAnimation(startDirectionName, endDirectionName,
+      return _bitmapTurnAnimation(startDirectionCopy, endDirectionCopy,
           duration, clockwise: false);
     });
   }
 
   /// The player turns right by 90 degrees.
   void turnRight() {
-    var startDirectionName = directionName;
+    var startDirectionCopy = direction;
 
     // Change the direction.
-    direction = (direction + 90) % 360;
+    direction = _nextDirectionClockwise;
 
-    var endDirectionName = directionName;
+    var endDirectionCopy = direction;
     var bitmapCopy = image;
 
     world.queueAction((duration) {
-      return _bitmapTurnAnimation(startDirectionName, endDirectionName,
+      return _bitmapTurnAnimation(startDirectionCopy, endDirectionCopy,
           duration, clockwise: true);
     });
+  }
+
+  /// The player checks if there is another field in front of him.
+  bool fieldFront() {
+    return world.getFieldInFront(x, y, direction) != null;
+  }
+
+  /// The player checks if there is a tree in front of him.
+  bool treeFront() {
+    return world.getActorsInFront(x, y, direction).any((Actor a) => a is Tree);
+  }
+
+  /// The player checks if there is a tree on his left side.
+  bool treeLeft() {
+    return world.getActorsInFront(x, y, _nextDirectionCounterclockwise)
+        .any((Actor a) => a is Tree);
+  }
+
+  /// The player checks if there is a tree on his right side.
+  bool treeRight() {
+    return world.getActorsInFront(x, y, _nextDirectionClockwise)
+        .any((Actor a) => a is Tree);
+  }
+
+  /// The player checks if there is a box in front of him.
+  bool boxFront() {
+    return world.getActorsInFront(x, y, direction).any((Actor a) => a is Box);
   }
 
   /// The player puts down a star.
@@ -156,30 +191,10 @@ abstract class Player extends Actor {
     return world.getActorsAt(x, y).any((Actor a) => a is Star);
   }
 
-  /// The player checks if there is a tree in front of him.
-  bool treeFront() {
-    return world.getActorsInFront(x, y, direction).any((Actor a) => a is Tree);
-  }
-
-  /// The player checks if there is a tree on his left side.
-  bool treeLeft() {
-    return world.getActorsInFront(x, y, (direction - 90) % 360).any((Actor a) => a is Tree);
-  }
-
-  /// The player checks if there is a tree on his right side.
-  bool treeRight() {
-    return world.getActorsInFront(x, y, (direction + 90) % 360).any((Actor a) => a is Tree);
-  }
-
-  /// The player checks if there is a box in front of him.
-  bool boxFront() {
-    return world.getActorsInFront(x, y, direction).any((Actor a) => a is Box);
-  }
-
   @override
   BitmapData get image {
     return world.resourceManager.getTextureAtlas(character)
-        .getBitmapData('${directionName}-0');
+        .getBitmapData('${directionName(direction)}-0');
   }
 
   /// Stops the execution.
@@ -191,12 +206,12 @@ abstract class Player extends Actor {
 
   @override
   Animatable _bitmapMoveAnimation(Point startPoint, Point targetPoint,
-                                  String directionName, double duration) {
+                                  Direction direction, double duration) {
     Point startPixel = World.cellToPixel(startPoint.x, startPoint.y);
     Point targetPixel = World.cellToPixel(targetPoint.x, targetPoint.y);
 
     List bitmapDatas = world.resourceManager.getTextureAtlas(character)
-        .getBitmapDatas(directionName);
+        .getBitmapDatas(directionName(direction));
 
     // Create the walk cycle.
     var walkCycle = [bitmapDatas[1], bitmapDatas[0], bitmapDatas[2], bitmapDatas[0]];
@@ -237,15 +252,15 @@ abstract class Player extends Actor {
   }
 
   @override
-  Animatable _bitmapTurnAnimation(String startDirectionName,
-                                  String endDirectionName, double duration,
+  Animatable _bitmapTurnAnimation(Direction startDirection,
+                                  Direction endDirection, double duration,
                                   {bool clockwise: true}) {
 
 //    List startImages = world.resourceManager.getTextureAtlas(character)
 //        .getBitmapDatas(startDirectionName);
 
     List endImages = world.resourceManager.getTextureAtlas(character)
-        .getBitmapDatas(endDirectionName);
+        .getBitmapDatas(directionName(endDirection));
 
     // Create the turn cycle.
     var turnCycle;
