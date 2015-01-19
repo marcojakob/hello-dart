@@ -14,8 +14,6 @@ directionName(Direction direction) {
   return s.substring(s.indexOf('.') + 1);
 }
 
-
-
 /// Superclass for all [Actor]s.
 abstract class Actor {
 
@@ -39,20 +37,20 @@ abstract class Actor {
   Direction get _nextDirectionCounterclockwise =>
       Direction.values[(direction.index - 1) % Direction.values.length];
 
-  /// The layer of the stage that this actor is added to.
-  Sprite get layer => world._getLayer(this);
-
   /// Visual representation of this actor.
   ///
   /// Note: The position and direction of the actor and its bitmap may
   /// not be in sync because the visual moves and turns are delayed.
-  Bitmap _bitmap;
+  BitmapZ _bitmap;
 
   /// Constructor.
   Actor([this.world, this.x, this.y]);
 
   /// Returns this actor's current image.
   BitmapData get image;
+
+  /// The stack order of this element.
+  int get zIndex;
 
   /// Moves the actor in the specified [direction].
   void _move(Direction direction) {
@@ -77,14 +75,18 @@ abstract class Actor {
     if (_bitmap == null) {
       // Create the bitmap.
       var coords = World.cellToPixel(x, y);
-      _bitmap = new Bitmap(image);
+      _bitmap = new BitmapZ(image);
       _bitmap
           ..x = coords.x
-          ..y = coords.y;
+          ..y = coords.y
+          ..layer = y
+          ..zIndex = zIndex
+          ..pivotX = _bitmap.width / 2
+          ..pivotY = _bitmap.height / 2;
     }
 
-    // Add to the layer for this actor type.
-    _bitmap.addTo(layer);
+    // Add to the world.
+    world.addChildAtZOrder(_bitmap);
   }
 
   /// Removes the bitmap of this actor from the world.
@@ -103,7 +105,21 @@ abstract class Actor {
     return new Tween(_bitmap, duration,
         TransitionFunction.linear)
       ..animate.x.to(targetPixel.x)
-      ..animate.y.to(targetPixel.y);
+      ..animate.y.to(targetPixel.y)
+      ..onStart = () {
+        if (targetPoint.y > startPoint.y) {
+          // Moving down, we must adjust layer during start.
+          _bitmap.layer = targetPoint.y;
+          world.updateChildIndexZOrder(_bitmap);
+        }
+      }
+      ..onComplete = () {
+        if (targetPoint.y < startPoint.y) {
+          // Moving up, we must adjust layer at end.
+          _bitmap.layer = targetPoint.y;
+          world.updateChildIndexZOrder(_bitmap);
+        }
+      };
   }
 
   /// Creates a turn animation from [startDirection] to [endDirection]

@@ -193,9 +193,12 @@ abstract class Player extends Actor {
 
   @override
   BitmapData get image {
-    return world.resourceManager.getTextureAtlas(character)
+    return world.resourceManager.getTextureAtlas('character')
         .getBitmapData('${directionName(direction)}-0');
   }
+
+  @override
+  int get zIndex => 2;
 
   /// Stops the execution.
   void _stop() {
@@ -207,10 +210,9 @@ abstract class Player extends Actor {
   @override
   Animatable _bitmapMoveAnimation(Point startPoint, Point targetPoint,
                                   Direction direction, double duration) {
-    Point startPixel = World.cellToPixel(startPoint.x, startPoint.y);
     Point targetPixel = World.cellToPixel(targetPoint.x, targetPoint.y);
 
-    List bitmapDatas = world.resourceManager.getTextureAtlas(character)
+    List bitmapDatas = world.resourceManager.getTextureAtlas('character')
         .getBitmapDatas(directionName(direction));
 
     // Create the walk cycle.
@@ -219,13 +221,21 @@ abstract class Player extends Actor {
     // Calculate the flip book frame rate.
     int frameRate = (walkCycle.length / duration).ceil();
 
+    int layerDuringMove = startPoint.y;
+    if (targetPoint.y > startPoint.y) {
+      layerDuringMove = targetPoint.y;
+    }
+
     // Create walking flip book.
-    FlipBook flipBook = new FlipBook(walkCycle, frameRate, false)
-            ..x = startPixel.x
-            ..y = startPixel.y
+    var flipBook = new FlipBookZ(walkCycle, frameRate, false)
+            ..x = _bitmap.x
+            ..y = _bitmap.y
+            ..layer = layerDuringMove
+            ..zIndex = _bitmap.zIndex
+            ..pivotX = _bitmap.pivotX
+            ..pivotY = _bitmap.pivotY
             ..mouseEnabled = false
-            ..play()
-            ..addTo(layer);
+            ..play();
 
     // Create the move tween.
     Tween tween = new Tween(flipBook, duration,
@@ -233,7 +243,7 @@ abstract class Player extends Actor {
       ..animate.x.to(targetPixel.x)
       ..animate.y.to(targetPixel.y)
       ..onStart = () {
-        // Remove bitmap.
+        world.addChildAtZOrder(flipBook);
         _bitmapRemoveFromWorld();
       }
       ..onComplete = () {
@@ -242,6 +252,7 @@ abstract class Player extends Actor {
         // Add bitmap again.
         _bitmap.x = targetPixel.x;
         _bitmap.y = targetPixel.y;
+        _bitmap.layer = targetPoint.y;
         _bitmapAddToWorld();
       };
 
@@ -256,7 +267,7 @@ abstract class Player extends Actor {
                                   Direction endDirection, double duration,
                                   {bool clockwise: true}) {
 
-    List endImages = world.resourceManager.getTextureAtlas(character)
+    List endImages = world.resourceManager.getTextureAtlas('character')
         .getBitmapDatas(directionName(endDirection));
 
     // Create the turn cycle.
@@ -272,18 +283,21 @@ abstract class Player extends Actor {
     int frameRate = (turnCycle.length / duration).ceil();
 
     // Create walking flip book.
-    FlipBook flipBook = new FlipBook(turnCycle, frameRate, false)
+    var flipBook = new FlipBookZ(turnCycle, frameRate, false)
             ..x = _bitmap.x
             ..y = _bitmap.y
+            ..layer = _bitmap.layer
+            ..zIndex = _bitmap.zIndex
+            ..pivotX = _bitmap.pivotX
+            ..pivotY = _bitmap.pivotY
             ..mouseEnabled = false
-            ..play()
-            ..addTo(layer);
+            ..play();
 
     Tween tween = new Tween(flipBook, duration,
         TransitionFunction.linear)
       ..onStart = () {
-        // Remove bitmap.
         _bitmapRemoveFromWorld();
+        world.addChildAtZOrder(flipBook);
       }
       ..onComplete = () {
         flipBook.removeFromParent();

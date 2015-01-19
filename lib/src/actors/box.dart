@@ -10,4 +10,7 @@ class Box extends Actor {
   BitmapData get image {
     return world.resourceManager.getBitmapData('box');
   }
+
+  @override
+  int get zIndex => 4;
 }

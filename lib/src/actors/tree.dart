@@ -11,4 +11,7 @@ class Tree extends Actor {
   BitmapData get image {
     return world.resourceManager.getBitmapData('tree');
   }
+
+  @override
+  int get zIndex => 3;
 }

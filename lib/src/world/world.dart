@@ -77,18 +77,6 @@ class World extends Sprite {
   /// A Queue of player actions waiting to be executed.
   final Queue<PlayerAction> _actionQueue = new Queue();
 
-  /// The layer for the [Player].
-  Sprite _playerLayer;
-
-  /// The layer for [Star]s.
-  Sprite _starsLayer;
-
-  /// The layer for [Box]s.
-  Sprite _boxesLayer;
-
-  /// The layer for [Tree]s.
-  Sprite _treesLayer;
-
   /// The subscription for enter frame events.
   StreamSubscription _enterFrameSub;
 
@@ -132,20 +120,11 @@ class World extends Sprite {
       // Draw the background cells.
       _drawBackground();
 
-      // Init the actor layers.
-      _playerLayer = new Sprite();
-      _starsLayer = new Sprite();
-      _boxesLayer = new Sprite();
-      _treesLayer = new Sprite();
-
-      // Add the layers in the correct order.
-      addChild(_starsLayer);
-      addChild(_boxesLayer);
-      addChild(_treesLayer);
-      addChild(_playerLayer);
-
       // Add actors.
       actors.forEach((actor) => actor._bitmapAddToWorld());
+
+      // Sort the background and actors.
+      sortChildren(ZOrder.compare);
 
       // Execute the user's start()-method. This will fill the action queue.
       try {
@@ -195,7 +174,7 @@ class World extends Sprite {
   /// Returns the field that is a number of [steps] away from [x], [y]
   /// in the specified [direction].
   Field getFieldInFront(int x, int y, Direction direction, [int steps = 1]) {
-    Point p = _getPointInFront(x, y, direction, steps);
+    Point p = World.getPointInFront(x, y, direction, steps);
 
     return getFieldAt(p.x, p.y);
   }
@@ -209,27 +188,30 @@ class World extends Sprite {
   /// Returns a list of actors that are a number of [steps] away from [x], [y]
   /// in the specified [direction].
   List<Actor> getActorsInFront(int x, int y, Direction direction, [int steps = 1]) {
-    Point p = _getPointInFront(x, y, direction, steps);
+    Point p = World.getPointInFront(x, y, direction, steps);
 
     return getActorsAt(p.x, p.y);
   }
 
-  /// Returns the point that is a number of [steps] away from [x], [y] in
-  /// the specified [direction].
-  Point _getPointInFront(int x, int y, Direction direction, [int steps = 1]) {
-    switch (direction) {
-      case Direction.right:
-        return new Point(x + steps, y);
-      case Direction.down:
-        return new Point(x, y + steps);
-      case Direction.left:
-        return new Point(x - steps, y);
-      case Direction.up:
-        return new Point(x, y - steps);
-    }
+  /// Adds the [child] at the correct z-order position.
+  void addChildAtZOrder(DisplayObjectZ child) {
+    addChildAt(child, _getChildIndexForZOrder(child));
+  }
 
-    // Should never get here.
-    return null;
+  /// Recalculates the correct child index of [child] and updates it.
+  void updateChildIndexZOrder(DisplayObjectZ child) {
+    setChildIndex(child, math.min(_getChildIndexForZOrder(child), numChildren - 1));
+  }
+
+  /// Returns the correct child index where a child with [order] should be
+  /// inserted.
+  int _getChildIndexForZOrder(ZOrder order) {
+    for (int i = 0; i < numChildren; i++) {
+      if (ZOrder.compare(getChildAt(i), order) > 0) {
+        return i;
+      }
+    }
+    return numChildren;
   }
 
   /// Loads all assets.
@@ -244,7 +226,7 @@ class World extends Sprite {
         ..addBitmapData('star', '${assetDir}/images/star.png')
         ..addBitmapData('box', '${assetDir}/images/box.png')
         ..addBitmapData('tree', '${assetDir}/images/tree.png')
-        ..addTextureAtlas(character, '${assetDir}/images/${character}.json',
+        ..addTextureAtlas('character', '${assetDir}/images/${character}.json',
             TextureAtlasFormat.JSONARRAY)
         ..addTextFile('scenario', scenarioFile);
 
@@ -290,25 +272,16 @@ class World extends Sprite {
   void _drawBackground() {
     fields.forEach((field) {
       var coords = cellToPixel(field.x, field.y);
-      var tileBitmap = new Bitmap(field.image);
+      var tileBitmap = new BitmapZ(field.image);
       tileBitmap
           ..x = coords.x
-          ..y = coords.y;
+          ..y = coords.y
+          ..layer = field.y
+          ..zIndex = field.zIndex
+          ..pivotX = tileBitmap.width / 2
+          ..pivotY = tileBitmap.height / 2;
       addChild(tileBitmap);
     });
-  }
-
-  /// Returns the layer for the actor type.
-  Sprite _getLayer(Actor actor) {
-    if (actor is Star) {
-      return _starsLayer;
-    } else if (actor is Box) {
-      return _boxesLayer;
-    } else if (actor is Tree) {
-      return _treesLayer;
-    } else {
-      return _playerLayer;
-    }
   }
 
   /// Initializes the slider to change the speed.
@@ -384,10 +357,31 @@ class World extends Sprite {
   }
 
   /// Translates a cell coordinate into pixel.
+  ///
+  /// The returned point is always the center of the cell.
   static Point cellToPixel(num x, num y) {
     return new Point(
-        x * cellWidth,
-        y * cellHeight);
+        x * cellWidth + (cellWidth / 2),
+        y * cellHeight + (cellHeight / 2) + marginTop);
+  }
+
+  /// Returns the point that is a number of [steps] away from [x], [y] in
+  /// the specified [direction].
+  static Point getPointInFront(int x, int y, Direction direction, [int steps = 1]) {
+    switch (direction) {
+      case Direction.right:
+        return new Point(x + steps, y);
+      case Direction.down:
+        return new Point(x, y + steps);
+      case Direction.left:
+        return new Point(x - steps, y);
+      case Direction.up:
+        return new Point(x, y - steps);
+    }
+
+    // It's not possible to get here, but this will shut up the warning.
+    // TODO: Remove this once it gets fixed.
+    return null;
   }
 }
 
@@ -396,3 +390,72 @@ class World extends Sprite {
 /// The [duration] is the time that is available to the action in seconds.
 typedef Animatable PlayerAction(double duration);
 
+
+/// Extends [Bitmap] to have a z-order.
+class BitmapZ extends Bitmap implements DisplayObjectZ {
+
+  @override
+  int layer = 0;
+
+  @override
+  int zIndex = 0;
+
+  BitmapZ([BitmapData bitmapData = null]) : super(bitmapData);
+
+}
+
+/// Extends [FlipBook] to have a z-order.
+class FlipBookZ extends FlipBook implements DisplayObjectZ {
+
+  @override
+  int layer = 0;
+
+  @override
+  int zIndex = 0;
+
+  FlipBookZ(List<BitmapData> bitmapDatas, [int frameRate = 30, bool loop = true]) :
+    super(bitmapDatas, frameRate, loop);
+}
+
+/// Extends [DisplayObject] to have a z-order.
+abstract class DisplayObjectZ extends DisplayObject implements ZOrder {}
+
+/// Class to provide information about the z-order.
+abstract class ZOrder {
+
+  /// Layer.
+  int layer;
+
+  /// The stack order of this element inside a layer.
+  ///
+  /// An element with greater stack order is always in front of an element with
+  /// lower stack order.
+  int zIndex;
+
+  /// Function to compare two display objects via their [ZOrder] (if they
+  /// implement it).
+  static int compare(a, b) {
+    if (a is ZOrder) {
+      if (b is ZOrder) {
+        ZOrder aOrder = a as ZOrder;
+        ZOrder bOrder = b as ZOrder;
+
+        if (aOrder.layer != bOrder.layer) {
+          return aOrder.layer.compareTo(bOrder.layer);
+
+        } else {
+          // Same layer. Must compare z-index.
+          return aOrder.zIndex.compareTo(bOrder.zIndex);
+        }
+
+      } else {
+        // b is not a ZOrder.
+        return -1;
+      }
+
+    } else {
+      // a is not a ZOrder.
+      return 1;
+    }
+  }
+}

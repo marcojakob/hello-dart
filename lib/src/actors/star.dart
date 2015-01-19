@@ -10,4 +10,7 @@ class Star extends Actor {
   BitmapData get image {
     return world.resourceManager.getBitmapData('star');
   }
+
+  @override
+  int get zIndex => 1;
 }
