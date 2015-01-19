@@ -31,15 +31,8 @@ class MessagesDe extends Messages {
       "Ihr Programm dauert zu lange oder beendet gar nicht!";
 
   @override
-  String scenarioNotFoundException(String file) =>
-      "Konnte die Szenario-Datei nicht finden: $file";
-
+  String fileNotFoundException() =>
+      "Eine Datei konnte nicht geladen werden. Bitte überprüfe die Bilder oder die Szenario-Datei.";
   @override
-  String scenarioInvalid([String file]) {
-    if (file == null) {
-      return "Das Szenario ist ungültig.";
-    } else {
-      return "Das Szenario ist ungültig: $file";
-    }
-  }
+  String scenarioInvalid() => "Das Szenario ist ungültig.";
 }

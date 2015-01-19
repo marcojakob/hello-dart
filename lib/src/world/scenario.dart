@@ -345,31 +345,13 @@ class Scenario {
     return null;
   }
 
-  /// Reads the scenario from specified [file].
-  ///
-  /// Throws a [ScenarioException] if the scenario could not be loaded or
-  /// parsed.
-  static Future<Scenario> loadFromFile(String file) {
-    Completer<Scenario> completer = new Completer();
-
-    html.HttpRequest.getString(file)
-      .then((String scenarioString) {
-        completer.complete(_parseScenario(scenarioString, file));
-      }).catchError((error) {
-        if (error is! ScenarioException) {
-          error = new ScenarioException(messages.scenarioNotFoundException(file));
-        }
-        completer.completeError(error);
-      });
-
-    return completer.future;
-  }
-
   /// Parses the [scenarioString] and creates a [Scenario].
   ///
   /// The [scenarioString] must contain title, width, height, and actors
   /// entries.
-  static Scenario _parseScenario(String scenarioString, String file) {
+  ///
+  /// If the scenario couldn't be parsed, a [ScenarioException] is thrown.
+  static Scenario parse(String scenarioString, String file) {
     var scanner = new StringScanner(scenarioString);
 
     bool titleStart = scanner.scan(new RegExp(r'[-]+.*'));
@@ -379,7 +361,7 @@ class Scenario {
     if (scanner.scan(new RegExp(r'\r?\n(.*)'))) {
       title = scanner.lastMatch[1];
     } else {
-      throw new ScenarioException(messages.scenarioInvalid(file));
+      throw new ScenarioException(messages.scenarioInvalid());
     }
 
     bool titleEnd = scanner.scan(new RegExp(r'\r?\n[-]+.*'));
@@ -388,7 +370,7 @@ class Scenario {
     if (scanner.scan(new RegExp(r'\r?\n([\s\S]*)'))) {
       positions = scanner.lastMatch[1].trimRight();
     } else {
-      throw new ScenarioException(messages.scenarioInvalid(file));
+      throw new ScenarioException(messages.scenarioInvalid());
     }
 
     List<String> positionLines = positions.split(new RegExp(r'\r?\n'));

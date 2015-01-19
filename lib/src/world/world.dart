@@ -20,7 +20,7 @@ class World extends Sprite {
   static const int maxActions = 10000;
 
   /// The scenario of this world.
-  final Scenario scenario;
+  Scenario scenario;
 
   /// Instance of [Player] that contains the user's program.
   Player player;
@@ -101,27 +101,31 @@ class World extends Sprite {
   Juggler juggler;
   ResourceManager resourceManager;
 
-  /// Creates a new World with the specified [scenario] and [player].
+  /// Creates a new World with the specified [player].
   ///
   /// [speed] defines the initial speed.
-  World(this.scenario, this.player, this.speed) {
+  World(this.player, this.speed) {
     // Pass a reference of this world to the player.
     player.world = this;
+  }
 
-    // Init the scenario title.
-    _initTitle();
-
-    // Init actors and background fields.
-    scenario.build(this);
-
-    // Init the stage.
-    _initStage();
-
-    // Init the speed slider.
-    _initSpeedSlider();
-
+  /// Initializes the world with the scenario.
+  Future init(String scenarioFile) {
     // Load assets.
-    _loadAssets().then((_) {
+    return _loadAssets(scenarioFile).then((_) {
+      // Init scenario.
+      scenario = Scenario.parse(resourceManager.getTextFile('scenario'),
+          scenarioFile);
+      scenario.build(this);
+
+      // Init the scenario title.
+      _initTitle();
+
+      // Init the speed slider.
+      _initSpeedSlider();
+
+      // Init the stage.
+      _initStage();
 
       stage.addChild(this);
 
@@ -228,6 +232,32 @@ class World extends Sprite {
     return null;
   }
 
+  /// Loads all assets.
+  /// Assets are finished loading when the returned [Future] completes.
+  Future<ResourceManager> _loadAssets(String scenarioFile) {
+    Completer completer = new Completer();
+
+    resourceManager = new ResourceManager();
+
+    resourceManager
+        ..addBitmapData('field', '${assetDir}/images/${background}.png')
+        ..addBitmapData('star', '${assetDir}/images/star.png')
+        ..addBitmapData('box', '${assetDir}/images/box.png')
+        ..addBitmapData('tree', '${assetDir}/images/tree.png')
+        ..addTextureAtlas(character, '${assetDir}/images/${character}.json',
+            TextureAtlasFormat.JSONARRAY)
+        ..addTextFile('scenario', scenarioFile);
+
+    resourceManager.load().then((manager) {
+      completer.complete(manager);
+    }).catchError((error) {
+      completer.completeError(
+          new FileNotFoundException(messages.fileNotFoundException()));
+    });
+
+    return completer.future;
+  }
+
   /// Initializes the scenario title.
   void _initTitle() {
     // Create the title element and add it to the html body element.
@@ -254,21 +284,6 @@ class World extends Sprite {
     renderLoop = new RenderLoop()
         ..addStage(stage);
     juggler = renderLoop.juggler;
-    resourceManager = new ResourceManager();
-  }
-
-  /// Loads all assets.
-  /// Assets are finished loading when the returned [Future] completes.
-  Future _loadAssets() {
-    resourceManager
-        ..addBitmapData('field', '${assetDir}/images/${background}.png')
-        ..addBitmapData('star', '${assetDir}/images/star.png')
-        ..addBitmapData('box', '${assetDir}/images/box.png')
-        ..addBitmapData('tree', '${assetDir}/images/tree.png')
-        ..addTextureAtlas(character, '${assetDir}/images/${character}.json',
-            TextureAtlasFormat.JSONARRAY);
-
-    return resourceManager.load();
   }
 
   /// Draws the worlds background.

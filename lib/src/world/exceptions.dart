@@ -48,3 +48,19 @@ class ScenarioException implements HelloDartException {
   }
 }
 
+/// Exception for errors when trying to load a file.
+class FileNotFoundException implements HelloDartException {
+  final message;
+
+  FileNotFoundException(this.message);
+
+  @override
+  String toString() {
+    if (message == null) {
+      return "FileNotFoundException";
+    }
+    return "$message";
+  }
+}
+
+

@@ -54,18 +54,11 @@ Messages messages = new Messages();
 /// The [speed] is the duration between the execution of actions in milliseconds.
 void launch(String scenarioFile, Player player, [int speed = 300]) {
 
-  // Load the scenario from the file
-  Scenario.loadFromFile(scenarioFile).then((scenario) {
+  World world = new World(player, new Duration(milliseconds: speed));
 
-    // Initialize the world.
-    World world = new World(scenario, player, new Duration(milliseconds: speed));
-
-  }).catchError((e) {
-    if (e is HelloDartException) {
-      html.window.alert(e.toString());
-    } else {
-      // Rethrow.
-      throw e;
-    }
-  });
+  // Initialize the world.
+  world.init(scenarioFile).catchError((e) {
+    // Show an alert if it is a HelloDartException.
+    html.window.alert(e.toString());
+  }, test: (e) => e is HelloDartException);
 }

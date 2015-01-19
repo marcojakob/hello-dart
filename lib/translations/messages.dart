@@ -23,14 +23,8 @@ class Messages {
   String actionOverflowException() =>
       "Your program takes too long to execute or doesn't end at all!";
 
-  String scenarioNotFoundException(String file) =>
-      "Could not find the scenario file: $file";
+  String fileNotFoundException() =>
+      "Could not load a file: Please check your scenario and image files.";
 
-  String scenarioInvalid([String file]) {
-    if (file == null) {
-      return "The scenario is invalid.";
-    } else {
-      return "The scenario is invalid: $file";
-    }
-  }
+  String scenarioInvalid() => "The scenario is invalid.";
 }
