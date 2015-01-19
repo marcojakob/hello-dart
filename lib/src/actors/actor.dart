@@ -95,38 +95,36 @@ abstract class Actor {
     }
   }
 
-  /// Creates a move animation to the [targetPoint] with the specified [speed].
-  Animatable _bitmapMoveAnimation(Point startPoint, Point targetPoint, String directionName, 
-                                  Duration speed) {
+  /// Creates a move animation to the [targetPoint] with the specified
+  /// [duration] in seconds.
+  Animatable _bitmapMoveAnimation(Point startPoint, Point targetPoint,
+                                  String directionName, double duration) {
     Point targetPixel = World.cellToPixel(targetPoint.x, targetPoint.y);
 
-    return new Tween(_bitmap, speed.inMilliseconds / 1000,
-        TransitionFunction.easeInOutQuadratic)
+    return new Tween(_bitmap, duration,
+        TransitionFunction.linear)
       ..animate.x.to(targetPixel.x)
       ..animate.y.to(targetPixel.y);
   }
 
-  /// Creates a [DelayedCall] to update the image.
-  Animatable _bitmapDelayedUpdate(BitmapData newImage, Duration speed) {
-    var animGroup = new AnimationGroup();
-    
-    animGroup.add(new Tween(_bitmap, speed.inMilliseconds / 1000)
-      ..animate.alpha.to(0));
-    
-    Bitmap newBitmap = new Bitmap(newImage)
-      ..x = _bitmap.x
-      ..y = _bitmap.y
-      ..alpha = 0
-      ..addTo(layer);
-    
-    animGroup.add(new Tween(newBitmap, speed.inMilliseconds / 1000)
-      ..animate.alpha.to(1)
-      ..onComplete = () {
-        _bitmap.removeFromParent();
-        _bitmap = newBitmap;
-      });
-    
-    return animGroup;
+  /// Creates a turn animation from [startDirectionName] to [endDirectionName]
+  /// with the specified [duration] in seconds.
+  ///
+  /// If the bitmap was turned counterclockwise, set the [clockwise] parameter
+  /// to false.
+  ///
+  /// Note: Unless a subclass overrides this method, no turning will be done.
+  Animatable _bitmapTurnAnimation(String startDirectionName, String endDirectionName,
+                                  double duration, {clockwise: true}) {
+    // Do nothing.
+    return new DelayedCall(() {}, 0);
+  }
+
+  /// Creates a [DelayedCall] to update the image to [newImage].
+  Animatable _bitmapUpdateImage(BitmapData newImage, double duration) {
+    return new DelayedCall(() {
+      _bitmap.bitmapData = newImage;
+    }, 0);
   }
 }
 

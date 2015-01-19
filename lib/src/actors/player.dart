@@ -15,7 +15,7 @@ abstract class Player extends Actor {
   void move() {
     // Check for a tree.
     if (treeFront()) {
-      world.queueAction((spd) {
+      world.queueAction((duration) {
         throw new PlayerException(messages.cantMoveBecauseOfTree());
       });
       _stop();
@@ -32,7 +32,7 @@ abstract class Player extends Actor {
 
         Point boxStartPointCopy = new Point(box.x, box.y);
         Point playerStartPointCopy = new Point(x, y);
-        
+
         // Push the box and move the player.
         box._move(direction);
         _move(direction);
@@ -44,61 +44,70 @@ abstract class Player extends Actor {
         var boxImage = box.image;
         String directionNameCopy = directionName;
 
-        world.queueAction((spd) {
+        world.queueAction((duration) {
           AnimationGroup animGroup = new AnimationGroup();
-          animGroup.add(box._bitmapMoveAnimation(boxStartPointCopy, 
-                                                 boxTargetPointCopy, 
-                                                 directionNameCopy, spd));
-          animGroup.add(box._bitmapDelayedUpdate(boxImage, spd));
-          animGroup.add(_bitmapMoveAnimation(playerStartPointCopy, 
-                                             playerTargetPointCopy, 
-                                             directionNameCopy, spd));
+          animGroup.add(box._bitmapMoveAnimation(boxStartPointCopy,
+                                                 boxTargetPointCopy,
+                                                 directionNameCopy, duration));
+          animGroup.add(box._bitmapUpdateImage(boxImage, duration));
+          animGroup.add(_bitmapMoveAnimation(playerStartPointCopy,
+                                             playerTargetPointCopy,
+                                             directionNameCopy, duration));
 
           return animGroup;
         });
 
       } else {
         // Could not push the box.
-        world.queueAction((spd) {
+        world.queueAction((duration) {
           throw new PlayerException(messages.cantMoveBecauseOfBox());
         });
         _stop();
       }
     } else {
       Point startPointCopy = new Point(x, y);
-      
+
       // Nothing in the way, the player can move.
       _move(direction);
-      
+
       Point targetPointCopy = new Point(x, y);
       String directionNameCopy = directionName;
 
-      world.queueAction((spd) {
-        return _bitmapMoveAnimation(startPointCopy, targetPointCopy, 
-            directionNameCopy, spd);
+      world.queueAction((duration) {
+        return _bitmapMoveAnimation(startPointCopy, targetPointCopy,
+            directionNameCopy, duration);
       });
     }
   }
 
   /// The player turns left by 90 degrees.
   void turnLeft() {
+    var startDirectionName = directionName;
+
+    // Change the direction.
     direction = (direction - 90) % 360;
 
-    var bitmapCopy = image;
+    var endDirectionName = directionName;
 
-    world.queueAction((spd) {
-      return _bitmapDelayedUpdate(bitmapCopy, spd);
+    world.queueAction((duration) {
+      return _bitmapTurnAnimation(startDirectionName, endDirectionName,
+          duration, clockwise: false);
     });
   }
 
   /// The player turns right by 90 degrees.
   void turnRight() {
+    var startDirectionName = directionName;
+
+    // Change the direction.
     direction = (direction + 90) % 360;
 
+    var endDirectionName = directionName;
     var bitmapCopy = image;
 
-    world.queueAction((spd) {
-      return _bitmapDelayedUpdate(bitmapCopy, spd);
+    world.queueAction((duration) {
+      return _bitmapTurnAnimation(startDirectionName, endDirectionName,
+          duration, clockwise: true);
     });
   }
 
@@ -108,13 +117,13 @@ abstract class Player extends Actor {
       Star star = new Star(world, x, y);
       world.actors.add(star);
 
-      world.queueAction((spd) {
+      world.queueAction((duration) {
         return new DelayedCall(() {
           star._bitmapAddToWorld();
         }, 0);
       });
     } else {
-      world.queueAction((spd) {
+      world.queueAction((duration) {
         throw new PlayerException(messages.cantPutStar());
       });
       _stop();
@@ -129,13 +138,13 @@ abstract class Player extends Actor {
     if (star != null) {
       world.actors.remove(star);
 
-      world.queueAction((spd) {
+      world.queueAction((duration) {
         return new DelayedCall(() {
           star._bitmapRemoveFromWorld();
         }, 0);
       });
     } else {
-      world.queueAction((spd) {
+      world.queueAction((duration) {
         throw new PlayerException(messages.cantRemoveStar());
       });
       _stop();
@@ -181,32 +190,31 @@ abstract class Player extends Actor {
   }
 
   @override
-  Animatable _bitmapMoveAnimation(Point startPoint, Point targetPoint, 
-                                  String directionName, Duration speed) {
+  Animatable _bitmapMoveAnimation(Point startPoint, Point targetPoint,
+                                  String directionName, double duration) {
     Point startPixel = World.cellToPixel(startPoint.x, startPoint.y);
     Point targetPixel = World.cellToPixel(targetPoint.x, targetPoint.y);
-    
-    List bitmapDatas = world.resourceManager.getTextureAtlas(character).getBitmapDatas(directionName);
-    
-    // Add the first image again at third position.
-    bitmapDatas.insert(2, bitmapDatas[0]);
-    
+
+    List bitmapDatas = world.resourceManager.getTextureAtlas(character)
+        .getBitmapDatas(directionName);
+
+    // Create the walk cycle.
+    var walkCycle = [bitmapDatas[1], bitmapDatas[0], bitmapDatas[2], bitmapDatas[0]];
+
     // Calculate the flip book frame rate.
-    int frameRate = (bitmapDatas.length / (speed.inMilliseconds / 1000)).ceil();
-    
+    int frameRate = (walkCycle.length / duration).ceil();
+
     // Create walking flip book.
-    FlipBook flipBook = new FlipBook(
-        bitmapDatas,
-            frameRate, false)
+    FlipBook flipBook = new FlipBook(walkCycle, frameRate, false)
             ..x = startPixel.x
             ..y = startPixel.y
             ..mouseEnabled = false
             ..play()
             ..addTo(layer);
 
-
-    Tween tween = new Tween(flipBook, speed.inMilliseconds / 1000,
-        TransitionFunction.easeInOutQuadratic)
+    // Create the move tween.
+    Tween tween = new Tween(flipBook, duration,
+        TransitionFunction.linear)
       ..animate.x.to(targetPixel.x)
       ..animate.y.to(targetPixel.y)
       ..onStart = () {
@@ -221,8 +229,59 @@ abstract class Player extends Actor {
         _bitmap.y = targetPixel.y;
         _bitmapAddToWorld();
       };
-      
-    AnimationGroup animGroup = new AnimationGroup(); 
+
+    AnimationGroup animGroup = new AnimationGroup();
+    animGroup.add(flipBook);
+    animGroup.add(tween);
+    return animGroup;
+  }
+
+  @override
+  Animatable _bitmapTurnAnimation(String startDirectionName,
+                                  String endDirectionName, double duration,
+                                  {bool clockwise: true}) {
+
+//    List startImages = world.resourceManager.getTextureAtlas(character)
+//        .getBitmapDatas(startDirectionName);
+
+    List endImages = world.resourceManager.getTextureAtlas(character)
+        .getBitmapDatas(endDirectionName);
+
+    // Create the turn cycle.
+    var turnCycle;
+
+    if (clockwise) {
+      turnCycle = [endImages[2], endImages[0]];
+    } else {
+      turnCycle = [endImages[1], endImages[0]];
+    }
+
+    // Calculate the flip book frame rate.
+    int frameRate = (turnCycle.length / duration).ceil();
+
+    // Create walking flip book.
+    FlipBook flipBook = new FlipBook(turnCycle, frameRate, false)
+            ..x = _bitmap.x
+            ..y = _bitmap.y
+            ..mouseEnabled = false
+            ..play()
+            ..addTo(layer);
+
+    Tween tween = new Tween(flipBook, duration,
+        TransitionFunction.linear)
+      ..onStart = () {
+        // Remove bitmap.
+        _bitmapRemoveFromWorld();
+      }
+      ..onComplete = () {
+        flipBook.removeFromParent();
+
+        // Add bitmap again with turned image.
+        _bitmap.bitmapData = endImages[0];
+        _bitmapAddToWorld();
+      };
+
+    AnimationGroup animGroup = new AnimationGroup();
     animGroup.add(flipBook);
     animGroup.add(tween);
     return animGroup;
