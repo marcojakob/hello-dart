@@ -256,9 +256,6 @@ abstract class Player extends Actor {
                                   Direction endDirection, double duration,
                                   {bool clockwise: true}) {
 
-//    List startImages = world.resourceManager.getTextureAtlas(character)
-//        .getBitmapDatas(startDirectionName);
-
     List endImages = world.resourceManager.getTextureAtlas(character)
         .getBitmapDatas(directionName(endDirection));
 

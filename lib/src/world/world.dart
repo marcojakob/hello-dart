@@ -261,7 +261,7 @@ class World extends Sprite {
   /// Assets are finished loading when the returned [Future] completes.
   Future _loadAssets() {
     resourceManager
-        ..addBitmapData('field', '${assetDir}/images/field.png')
+        ..addBitmapData('field', '${assetDir}/images/${background}.png')
         ..addBitmapData('star', '${assetDir}/images/star.png')
         ..addBitmapData('box', '${assetDir}/images/box.png')
         ..addBitmapData('tree', '${assetDir}/images/tree.png')

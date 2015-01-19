@@ -31,6 +31,15 @@ part 'translations/messages_de.dart';
 /// * pinkgirl
 String character = 'boy';
 
+/// The background fields.
+///
+/// Possible fields:
+/// * grass
+/// * stone
+/// * wood
+/// * dirt
+String background = 'grass';
+
 /// The translated messages.
 ///
 /// For other languages, set this variable to another [Messages] object.
