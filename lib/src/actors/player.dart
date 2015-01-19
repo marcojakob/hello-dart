@@ -198,7 +198,7 @@ abstract class Player extends Actor {
   }
 
   @override
-  int get zIndex => 2;
+  int get zIndex => 4;
 
   /// Stops the execution.
   void _stop() {

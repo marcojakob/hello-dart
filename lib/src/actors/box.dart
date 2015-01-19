@@ -12,5 +12,5 @@ class Box extends Actor {
   }
 
   @override
-  int get zIndex => 4;
+  int get zIndex => 2;
 }
