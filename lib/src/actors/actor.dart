@@ -1,17 +1,24 @@
 part of hello_dart;
 
 /// The direction of an actor.
-enum Direction {
-  right,
-  down,
-  left,
-  up
-}
+///
+/// Note: This class mimics an enum in Dart. In future Dart versions we will
+/// be able to use real enums.
+class Direction {
+  static const right = const Direction._(0, 'right');
+  static const down = const Direction._(1, 'down');
+  static const left = const Direction._(2, 'left');
+  static const up = const Direction._(3, 'up');
 
-/// Returns the name of the [direction].
-directionName(Direction direction) {
-  var s = direction.toString();
-  return s.substring(s.indexOf('.') + 1);
+  static get values => [right, down, left, up];
+
+  final int index;
+  final String value;
+
+  const Direction._(this.index, this.value);
+
+  @override
+  String toString() => value;
 }
 
 /// Superclass for all [Actor]s.

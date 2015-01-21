@@ -194,7 +194,7 @@ abstract class Player extends Actor {
   @override
   BitmapData get image {
     return world.resourceManager.getTextureAtlas('character')
-        .getBitmapData('${directionName(direction)}-0');
+        .getBitmapData('${direction}-0');
   }
 
   @override
@@ -213,7 +213,7 @@ abstract class Player extends Actor {
     Point targetPixel = World.cellToPixel(targetPoint.x, targetPoint.y);
 
     List bitmapDatas = world.resourceManager.getTextureAtlas('character')
-        .getBitmapDatas(directionName(direction));
+        .getBitmapDatas('${direction}');
 
     // Create the walk cycle.
     var walkCycle = [bitmapDatas[1], bitmapDatas[0], bitmapDatas[2], bitmapDatas[0]];
@@ -268,7 +268,7 @@ abstract class Player extends Actor {
                                   {bool clockwise: true}) {
 
     List endImages = world.resourceManager.getTextureAtlas('character')
-        .getBitmapDatas(directionName(endDirection));
+        .getBitmapDatas('${endDirection}');
 
     // Create the turn cycle.
     var turnCycle;
