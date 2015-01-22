@@ -88,8 +88,8 @@ abstract class Actor {
           ..y = coords.y
           ..layer = y
           ..zIndex = zIndex
-          ..pivotX = _bitmap.width / 2
-          ..pivotY = _bitmap.height / 2;
+          ..pivotX = (_bitmap.width / 2).floor()
+          ..pivotY = (_bitmap.height / 2).floor();
     }
 
     // Add to the world.

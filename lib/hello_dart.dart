@@ -19,8 +19,8 @@ part 'src/world/scenario.dart';
 part 'src/world/field.dart';
 part 'src/world/exceptions.dart';
 
-part 'translations/messages.dart';
-part 'translations/messages_de.dart';
+part 'src/translations/messages.dart';
+part 'src/translations/messages_de.dart';
 
 /// The character of the player.
 ///

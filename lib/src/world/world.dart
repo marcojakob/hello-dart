@@ -4,7 +4,7 @@ part of hello_dart;
 class World extends Sprite {
 
   /// The asset directory.
-  static const String assetDir = 'packages/hello_dart';
+  static const String imagesDir = 'packages/hello_dart/images';
 
   /// The width of one cell in pixels.
   static int cellWidth = 100;
@@ -69,10 +69,10 @@ class World extends Sprite {
   }
 
   /// Returns the world's width in pixels (without margins).
-  int get widthInPixels => widthInCells * cellWidth;
+  int get widthInPixels => widthInCells * cellWidth + 1;
 
   /// Returns the world's height in pixels (without margins).
-  int get heightInPixels => heightInCells * cellHeight;
+  int get heightInPixels => heightInCells * cellHeight + marginTop + marginBottom;
 
   /// A Queue of player actions waiting to be executed.
   final Queue<PlayerAction> _actionQueue = new Queue();
@@ -99,6 +99,7 @@ class World extends Sprite {
 
   /// Initializes the world with the scenario.
   Future init(String scenarioFile) {
+
     // Load assets.
     return _loadAssets(scenarioFile).then((_) {
       // Init scenario.
@@ -106,14 +107,17 @@ class World extends Sprite {
           scenarioFile);
       scenario.build(this);
 
+      // Init body.
+      _initBody();
+
       // Init the scenario title.
       _initTitle();
 
-      // Init the speed slider.
-      _initSpeedSlider();
-
       // Init the stage.
       _initStage();
+
+      // Init the speed slider.
+      _initSpeedSlider();
 
       stage.addChild(this);
 
@@ -222,11 +226,11 @@ class World extends Sprite {
     resourceManager = new ResourceManager();
 
     resourceManager
-        ..addBitmapData('field', '${assetDir}/images/${background}.png')
-        ..addBitmapData('star', '${assetDir}/images/star.png')
-        ..addBitmapData('box', '${assetDir}/images/box.png')
-        ..addBitmapData('tree', '${assetDir}/images/tree.png')
-        ..addTextureAtlas('character', '${assetDir}/images/${character}.json',
+        ..addBitmapData('field', '${imagesDir}/${background}.png')
+        ..addBitmapData('star', '${imagesDir}/star.png')
+        ..addBitmapData('box', '${imagesDir}/box.png')
+        ..addBitmapData('tree', '${imagesDir}/tree.png')
+        ..addTextureAtlas('character', '${imagesDir}/${character}.json',
             TextureAtlasFormat.JSONARRAY)
         ..addTextFile('scenario', scenarioFile);
 
@@ -240,12 +244,42 @@ class World extends Sprite {
     return completer.future;
   }
 
+  /// Initializes the html body.
+  void _initBody() {
+    html.document.body.style
+      ..margin = '0 10px'
+      ..padding = '0'
+      ..overflow = 'hidden'
+      ..fontFamily = 'Helvetica Neue, Helvetica, Arial, sans-serif'
+      ..display = 'flex'
+      ..height = '100vh'
+      ..flexDirection = 'column'
+      ..justifyContent = 'center'
+      ..setProperty('flex-pack', 'center') // For IE10.
+      ..alignItems = 'center'
+      ..setProperty('flex-align', 'center') // For IE10.
+      ..background = 'url(${imagesDir}/background/clouds2.jpg) no-repeat center center fixed'
+      ..backgroundSize = 'cover';
+//      ..background = 'linear-gradient(to bottom, #94d1e3 0%,#ffffff 100%';
+  }
+
   /// Initializes the scenario title.
   void _initTitle() {
     // Create the title element and add it to the html body element.
     html.Element titleElement = new html.Element.tag('h2')
       ..id = 'title'
       ..text = scenario.title;
+
+    titleElement.style
+      ..maxWidth = '100%'
+      ..fontWeight = 'normal'
+      ..fontFamily = 'Lilita One, Helvetica Neue, Helvetica, Arial, sans-serif'
+      ..fontSize = '40px'
+      ..whiteSpace = 'nowrap'
+      ..color = 'white'
+      ..textShadow = '-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black,'
+              '0px 4px 3px rgba(0,0,0,0.4),'
+              '0px 8px 13px rgba(0,0,0,0.1)';
     html.document.body.children.add(titleElement);
   }
 
@@ -253,15 +287,21 @@ class World extends Sprite {
   void _initStage() {
     // Create the canvas element and add it to the html body element.
     html.CanvasElement stageCanvas = new html.CanvasElement()
-      ..id = 'stage';
-    html.document.body.children.add(stageCanvas);
+      ..id = 'stage'
+      ..style.width = '100%'
+      ..style.height = 'calc(100% - 120px)'
+      ..style.maxHeight = '${heightInPixels}px'
+      ..style.maxWidth = '${widthInPixels}px';
+      html.document.body.children.add(stageCanvas);
 
     // Init the Stage.
     stage = new Stage(stageCanvas,
         width: widthInPixels,
-        height: heightInPixels + marginTop + marginBottom,
+        height: heightInPixels,
         frameRate: 30,
+        alpha: true,
         webGL: true);
+    stage.backgroundColor = 0;
 
     renderLoop = new RenderLoop()
         ..addStage(stage);
@@ -278,8 +318,8 @@ class World extends Sprite {
           ..y = coords.y
           ..layer = field.y
           ..zIndex = field.zIndex
-          ..pivotX = tileBitmap.width / 2
-          ..pivotY = tileBitmap.height / 2;
+          ..pivotX = (tileBitmap.width / 2).floor()
+          ..pivotY = (tileBitmap.height / 2).floor();
       addChild(tileBitmap);
     });
   }
@@ -299,6 +339,13 @@ class World extends Sprite {
           // Set the new speed.
           speed = new Duration(milliseconds: ms);
         });
+
+    slider.style
+      ..padding = '5px 0'
+      ..marginTop = '25px'
+      ..marginBottom = '15px'
+      ..width = '100%'
+      ..maxWidth = '200px';
 
     html.document.body.children.add(slider);
   }
@@ -379,9 +426,8 @@ class World extends Sprite {
         return new Point(x, y - steps);
     }
 
-    // It's not possible to get here, but this will shut up the warning.
-    // TODO: Remove this once it gets fixed.
-    return null;
+    // We only get here if direction was null.
+    throw new ArgumentError.notNull('direction');
   }
 }
 
