@@ -121,13 +121,13 @@ class World extends Sprite {
 
       stage.addChild(this);
 
-      // Draw the background cells.
-      _drawBackground();
+      // Draw the fields.
+      _drawFields();
 
       // Add actors.
       actors.forEach((actor) => actor._bitmapAddToWorld());
 
-      // Sort the background and actors.
+      // Sort the fields and actors.
       sortChildren(ZOrder.compare);
 
       // Execute the user's start()-method. This will fill the action queue.
@@ -226,7 +226,7 @@ class World extends Sprite {
     resourceManager = new ResourceManager();
 
     resourceManager
-        ..addBitmapData('field', '${imagesDir}/${background}.png')
+        ..addBitmapData('field', '${imagesDir}/${field}.png')
         ..addBitmapData('star', '${imagesDir}/star.png')
         ..addBitmapData('box', '${imagesDir}/box.png')
         ..addBitmapData('tree', '${imagesDir}/tree.png')
@@ -258,9 +258,8 @@ class World extends Sprite {
       ..setProperty('flex-pack', 'center') // For IE10.
       ..alignItems = 'center'
       ..setProperty('flex-align', 'center') // For IE10.
-      ..background = 'url(${imagesDir}/background/clouds2.jpg) no-repeat center center fixed'
-      ..backgroundSize = 'cover';
-//      ..background = 'linear-gradient(to bottom, #94d1e3 0%,#ffffff 100%';
+      ..background = 'linear-gradient(${backgroundColorTop}, ${backgroundColorBottom})';
+
   }
 
   /// Initializes the scenario title.
@@ -309,7 +308,7 @@ class World extends Sprite {
   }
 
   /// Draws the worlds background.
-  void _drawBackground() {
+  void _drawFields() {
     fields.forEach((field) {
       var coords = cellToPixel(field.x, field.y);
       var tileBitmap = new BitmapZ(field.image);

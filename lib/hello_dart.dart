@@ -22,7 +22,7 @@ part 'src/world/exceptions.dart';
 part 'src/translations/messages.dart';
 part 'src/translations/messages_de.dart';
 
-/// The character of the player.
+/// The player image.
 ///
 /// Possible characters:
 /// * boy
@@ -31,14 +31,20 @@ part 'src/translations/messages_de.dart';
 /// * pinkgirl
 String character = 'boy';
 
-/// The background fields.
+/// The field image.
 ///
 /// Possible fields:
 /// * grass
 /// * stone
 /// * wood
 /// * dirt
-String background = 'grass';
+String field = 'grass';
+
+/// The top color for the background gradient.
+String backgroundColorTop = '#b3e3f9';
+
+/// The bottom color for the background gradient.
+String backgroundColorBottom = '#ffffff';
 
 /// The translated messages.
 ///
