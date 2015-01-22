@@ -1,10 +1,11 @@
 name: hello_dart
 version: 0.0.1
 author: Marco Jakob
-description: Learn to program Dart in a visual and fun environment.
-homepage: code.makery.ch
+description: A visual and playful introduction to programming with Dart.
+homepage: http://code.makery.ch/library/hello-dart/
+documentation: https://github.com/marcojakob/hello-dart
 dependencies:
-  browser: ">=0.10.0+2 <0.11.0"
-  collection: ">=1.1.0 <2.0.0"
-  stagexl: ">=0.10.3 <0.11.0"
-  string_scanner: ">=0.1.3 <0.2.0"
+  browser: '>=0.10.0+2 <0.11.0'
+  collection: '>=1.1.0 <2.0.0'
+  stagexl: '>=0.10.3 <0.11.0'
+  string_scanner: '>=0.1.3 <0.2.0'

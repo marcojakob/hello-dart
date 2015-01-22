@@ -58,7 +58,7 @@ Messages messages = new Messages();
 /// The [player] is the instance where the behaviour is programmed in.
 ///
 /// The [speed] is the duration between the execution of actions in milliseconds.
-void launch(String scenarioFile, Player player, [int speed = 300]) {
+void launch(String scenarioFile, Player player, [int speed = 1000]) {
 
   World world = new World(player, new Duration(milliseconds: speed));
 
