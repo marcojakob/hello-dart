@@ -146,8 +146,8 @@ abstract class Player extends Actor {
     return world.getActorsInFront(x, y, direction).any((Actor a) => a is Box);
   }
 
-  /// The player puts down a star.
-  void putStar() {
+  /// The player adds a star.
+  void addStar() {
     if (!onStar()) {
       Star star = new Star(world, x, y);
       world.actors.add(star);
@@ -165,7 +165,7 @@ abstract class Player extends Actor {
     }
   }
 
-  /// The player picks up a star.
+  /// The player removes a star.
   void removeStar() {
     Star star = world.getActorsAt(x, y).firstWhere((Actor a) => a is Star,
         orElse: () => null);

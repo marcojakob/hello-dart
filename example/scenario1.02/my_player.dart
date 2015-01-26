@@ -6,7 +6,7 @@ class MyPlayer extends Player {
   /// Your program.
   void start() {
     move();
-    putStar();
+    addStar();
     move();
   }
 }
