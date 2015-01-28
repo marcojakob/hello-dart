@@ -4,14 +4,13 @@ import 'package:hello_dart/hello_dart.dart';
 class MyPlayer extends Player {
 
   /// Your program.
-  void start() {
+  start() {
     move();
-    addStar();
+    putStar();
     move();
   }
 }
 
-/// The applications main method.
-void main() {
-  launch('scenario.txt', new MyPlayer());
+main() {
+  createWorld('scenario.txt', new MyPlayer());
 }
