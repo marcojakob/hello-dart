@@ -4,6 +4,9 @@ part of hello_dart;
 ///
 /// Your program should be written in a subclass of this class.
 abstract class Player extends Actor {
+  
+  /// The direction of this actor.
+  Direction direction = Direction.right;
 
   /// Constructor.
   Player() : super(null, -1, -1);
@@ -13,15 +16,15 @@ abstract class Player extends Actor {
 
   /// The player makes a step in the current direction.
   void move() {
-    // Check if there is another field in front.
-    if (!fieldFront()) {
+    // Ensure there is a field in front.
+    if (world.getFieldInFront(x, y, direction) == null) {
       world.queueAction((duration) {
         throw new PlayerException(messages.cantMoveBecauseNoField());
       });
       _stop();
     }
 
-    // Check for a tree.
+    // Ensure there is no tree.
     if (treeFront()) {
       world.queueAction((duration) {
         throw new PlayerException(messages.cantMoveBecauseOfTree());
@@ -29,14 +32,13 @@ abstract class Player extends Actor {
       _stop();
     }
 
-    // Check for a box.
+    // Check for a box. If there is a box, ensure it can be moved.
     Box box = world.getActorsInFront(x, y, direction)
         .firstWhere((Actor a) => a is Box, orElse: () => null);
 
     if (box != null) {
       // Check if the box can be pushed to the next field.
-      if (world.getFieldInFront(x, y, direction, 2) != null &&
-          !world.getActorsInFront(x, y, direction, 2).any((a) => a is Tree || a is Box)) {
+      if (box.canMove(direction)) {
 
         Point boxStartPointCopy = new Point(box.x, box.y);
         Point playerStartPointCopy = new Point(x, y);
@@ -119,35 +121,55 @@ abstract class Player extends Actor {
     });
   }
 
-  /// The player checks if there is another field in front of him.
-  bool fieldFront() {
-    return world.getFieldInFront(x, y, direction) != null;
+  /// The player checks if he/she can move to the next field.
+  bool canMove() {
+    
+    // Ensure there is a field in front.
+    if (world.getFieldInFront(x, y, direction) == null) {
+      return false;
+    }
+    
+    // Ensure there is no tree.
+    if (treeFront()) {
+      return false;
+    }
+    
+    // Check for a box. If there is a box, ensure it can be moved.
+    Box box = world.getActorsInFront(x, y, direction)
+        .firstWhere((Actor a) => a is Box, orElse: () => null);
+    
+    if (box != null && !box.canMove(direction)) {
+      return false; 
+    }
+    
+    // Nothing in the way, we can move.
+    return true;
   }
-
-  /// The player checks if there is a tree in front of him.
+  
+  /// The player checks if there is a tree in front.
   bool treeFront() {
     return world.getActorsInFront(x, y, direction).any((Actor a) => a is Tree);
   }
 
-  /// The player checks if there is a tree on his left side.
+  /// The player checks if there is a tree on the left side.
   bool treeLeft() {
     return world.getActorsInFront(x, y, _nextDirectionCounterclockwise)
         .any((Actor a) => a is Tree);
   }
 
-  /// The player checks if there is a tree on his right side.
+  /// The player checks if there is a tree on the right side.
   bool treeRight() {
     return world.getActorsInFront(x, y, _nextDirectionClockwise)
         .any((Actor a) => a is Tree);
   }
 
-  /// The player checks if there is a box in front of him.
+  /// The player checks if there is a box in front.
   bool boxFront() {
     return world.getActorsInFront(x, y, direction).any((Actor a) => a is Box);
   }
 
   /// The player adds a star.
-  void addStar() {
+  void putStar() {
     if (!onStar()) {
       Star star = new Star(world, x, y);
       world.actors.add(star);
@@ -186,7 +208,7 @@ abstract class Player extends Actor {
     }
   }
 
-  /// The player checks if he stands on a star.
+  /// The player checks if he/she is on a star.
   bool onStar() {
     return world.getActorsAt(x, y).any((Actor a) => a is Star);
   }
@@ -206,6 +228,14 @@ abstract class Player extends Actor {
     // leave an executing method.
     throw new StopException();
   }
+  
+  /// Returns the next direction when turning clockwise.
+  Direction get _nextDirectionClockwise =>
+      Direction.values[(direction.index + 1) % Direction.values.length];
+
+  /// Returns the next direction when turning counter clockwise.
+  Direction get _nextDirectionCounterclockwise =>
+      Direction.values[(direction.index - 1) % Direction.values.length];
 
   @override
   Animatable _bitmapMoveAnimation(Point startPoint, Point targetPoint,

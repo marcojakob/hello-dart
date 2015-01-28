@@ -33,17 +33,6 @@ abstract class Actor {
   /// The vertical position.
   int y = 0;
 
-  /// The direction of this actor.
-  Direction direction = Direction.right;
-
-  /// Returns the next direction when turning clockwise.
-  Direction get _nextDirectionClockwise =>
-      Direction.values[(direction.index + 1) % Direction.values.length];
-
-  /// Returns the next direction when turning counter clockwise.
-  Direction get _nextDirectionCounterclockwise =>
-      Direction.values[(direction.index - 1) % Direction.values.length];
-
   /// Visual representation of this actor.
   ///
   /// Note: The position and direction of the actor and its bitmap may
