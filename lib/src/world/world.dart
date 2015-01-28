@@ -12,7 +12,7 @@ class World extends Sprite {
   /// The height of one cell in pixels.
   static int cellHeight = 80;
 
-  static int marginTop = 45;
+  static int marginTop = 80;
   static int marginBottom = 46;
 
   /// The maximum number of calls to the player's action methods that are
@@ -25,8 +25,8 @@ class World extends Sprite {
   /// Instance of [Player] that contains the user's program.
   Player player;
 
-  /// The duration between the execution of actions in milliseconds.
-  Duration speed;
+  /// The duration between the execution of actions (in seconds).
+  num speed;
 
   /// A list of all actors except the player (stars, boxes and trees).
   List<Actor> actors;
@@ -80,8 +80,11 @@ class World extends Sprite {
   /// The subscription for enter frame events.
   StreamSubscription _enterFrameSub;
 
-  /// The time when the next action may be executed, in milliseconds.
+  /// The time when the next action may be executed, in seconds.
   num _nextActionTime = 0;
+  
+  /// The animatable of the currently executing action.
+  Animatable _actionAnimatable;
 
   // StageXL references.
   Stage stage;
@@ -128,7 +131,7 @@ class World extends Sprite {
       actors.forEach((actor) => actor._bitmapAddToWorld());
 
       // Sort the fields and actors.
-      sortChildren(ZOrder.compare);
+      sortChildren(_displayObjectCompare);
 
       // Execute the user's start()-method. This will fill the action queue.
       try {
@@ -209,9 +212,9 @@ class World extends Sprite {
 
   /// Returns the correct child index where a child with [order] should be
   /// inserted.
-  int _getChildIndexForZOrder(ZOrder order) {
+  int _getChildIndexForZOrder(DisplayObjectZ order) {
     for (int i = 0; i < numChildren; i++) {
-      if (ZOrder.compare(getChildAt(i), order) > 0) {
+      if (_displayObjectCompare(getChildAt(i), order) > 0) {
         return i;
       }
     }
@@ -231,6 +234,8 @@ class World extends Sprite {
         ..addBitmapData('box', '${imagesDir}/box.png')
         ..addBitmapData('tree', '${imagesDir}/tree.png')
         ..addTextureAtlas('character', '${imagesDir}/${character}.json',
+            TextureAtlasFormat.JSONARRAY)
+        ..addTextureAtlas('speech-bubble', '${imagesDir}/speech-bubble.json', 
             TextureAtlasFormat.JSONARRAY)
         ..addTextFile('scenario', scenarioFile);
 
@@ -274,6 +279,8 @@ class World extends Sprite {
       ..fontWeight = 'normal'
       ..fontFamily = 'Lilita One, Helvetica Neue, Helvetica, Arial, sans-serif'
       ..fontSize = '40px'
+      ..marginTop = '10px'
+      ..marginBottom = '5px'
       ..whiteSpace = 'nowrap'
       ..color = 'white'
       ..textShadow = '-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black,'
@@ -300,7 +307,7 @@ class World extends Sprite {
         frameRate: 30,
         alpha: true,
         webGL: true);
-    stage.backgroundColor = 0;
+    stage.backgroundColor = 0x00; // First two numbers after x are transparency.
 
     renderLoop = new RenderLoop()
         ..addStage(stage);
@@ -329,14 +336,13 @@ class World extends Sprite {
     slider..id = 'speed-slider'
         ..min = '0'
         ..max = '100'
-        ..value = '${100 - _logValueToSlider(speed.inMilliseconds)}'
+        ..value = '${100 - _logValueToSlider(speed)}'
         ..step = '1'
         ..onChange.listen((_) {
           int sliderValue = 100 - math.max(0, math.min(100, int.parse(slider.value)));
-          int ms = _logSliderToValue(sliderValue);
 
           // Set the new speed.
-          speed = new Duration(milliseconds: ms);
+          speed = _logSliderToValue(sliderValue);
         });
 
     slider.style
@@ -349,8 +355,8 @@ class World extends Sprite {
     html.document.body.children.add(slider);
   }
 
-  /// Converts the [sliderValue] to a speed value in milliseconds.
-  int _logSliderToValue(int sliderValue) {
+  /// Converts the [sliderValue] to a speed value in seconds.
+  num _logSliderToValue(int sliderValue) {
     int minSlider = 0;
     int maxSlider = 100;
 
@@ -360,39 +366,54 @@ class World extends Sprite {
     // Calculate adjustment factor.
     double scale = (maxValue - minValue) / (maxSlider - minSlider);
 
-    return math.exp(minValue + scale * (sliderValue - minSlider)).round();
+    return math.exp(minValue + scale * (sliderValue - minSlider)).round() / 1000;
   }
 
-  /// Converts the speed [value] to a slider value.
-  int _logValueToSlider(int value) {
+  /// Converts the speed [value] (in seconds) to a slider value.
+  int _logValueToSlider(num value) {
+    num ms = value * 1000;
+    
     int minSlider = 0;
     int maxSlider = 100;
 
-    double minValue = math.log(10);
-    double maxValue = math.log(1500);
+    double minValueMs = math.log(10);
+    double maxValueMs = math.log(1500);
 
     // Calculate adjustment factor.
-    double scale = (maxValue - minValue) / (maxSlider - minSlider);
+    double scale = (maxValueMs - minValueMs) / (maxSlider - minSlider);
 
-    return ((math.log(value) - minValue) / scale + minSlider).round();
+    return ((math.log(ms) - minValueMs) / scale + minSlider).round();
   }
 
   /// Checks the action queue if there are actions to be executed. If there are
   /// actions, one action is executed and removed from the queue.
   void _executeNextAction() {
     if (_actionQueue.isNotEmpty) {
-      // Get the current time in milliseconds.
-      num currentTime = juggler.elapsedTime * 1000;
+      // Get the current time.
+      num currentTime = juggler.elapsedTime;
 
+      // Test if the time is ready.
       if (currentTime > _nextActionTime) {
-        _nextActionTime = currentTime + speed.inMilliseconds;
+        // Test if last action is still animating in the juggler.
+        if (_actionAnimatable != null && 
+            juggler.contains(_actionAnimatable) && 
+            _actionAnimatable.advanceTime(0.01)) {
+          return;
+        }
+        
+        _nextActionTime = currentTime + speed;
 
         PlayerAction action = _actionQueue.removeFirst();
         try {
-          // Only use 75% of the duration for the actual action to allow a break.
-          double actionDuration = speed.inMilliseconds * .7 / 1000;
-          Animatable actionAnim = action(actionDuration);
-          juggler.add(actionAnim);
+          // Only use 70% of the duration for the actual action to allow a break.
+          double actionDuration = speed * .7;
+          
+          // Execute the player action.
+          _actionAnimatable = action(actionDuration);
+          
+          if (_actionAnimatable != null) {
+            juggler.add(_actionAnimatable);
+          }
         } on PlayerException catch(e) {
           // Show the exception to the user.
           html.window.alert(e.toString());
@@ -432,75 +453,91 @@ class World extends Sprite {
 
 /// The type for a [Player] action function.
 ///
-/// The [duration] is the time that is available to the action in seconds.
+/// The [duration] is the time that is available to the action (in seconds).
+/// 
+/// The function must return an [Animatable] or null if there is nothing to 
+/// be animated.
 typedef Animatable PlayerAction(double duration);
 
 
 /// Extends [Bitmap] to have a z-order.
 class BitmapZ extends Bitmap implements DisplayObjectZ {
-
   @override
   int layer = 0;
-
+  
   @override
   int zIndex = 0;
-
+  
   BitmapZ([BitmapData bitmapData = null]) : super(bitmapData);
-
 }
 
 /// Extends [FlipBook] to have a z-order.
 class FlipBookZ extends FlipBook implements DisplayObjectZ {
-
   @override
   int layer = 0;
-
+  
   @override
   int zIndex = 0;
-
+  
   FlipBookZ(List<BitmapData> bitmapDatas, [int frameRate = 30, bool loop = true]) :
     super(bitmapDatas, frameRate, loop);
+  
+  /// TODO: This only a hack because of bug 
+  /// https://github.com/bp74/StageXL/issues/178
+  /// Should be removed when the bug is fixed.
+  @override
+  bool advanceTime(num time) {
+    bool result = super.advanceTime(time);
+    
+    if (!loop && currentFrame == totalFrames - 1) {
+      return false;
+    }
+    
+    return result;
+  }
+}
+
+/// Extends [Sprite] to have a z-order.
+class SpriteZ extends Sprite implements DisplayObjectZ {  
+  @override
+  int layer = 0;
+  
+  @override
+  int zIndex = 0;
 }
 
 /// Extends [DisplayObject] to have a z-order.
-abstract class DisplayObjectZ extends DisplayObject implements ZOrder {}
-
-/// Class to provide information about the z-order.
-abstract class ZOrder {
-
+abstract class DisplayObjectZ extends DisplayObject {
   /// Layer.
-  int layer;
+  int layer = 0;
 
   /// The stack order of this element inside a layer.
   ///
   /// An element with greater stack order is always in front of an element with
   /// lower stack order.
-  int zIndex;
+  int zIndex = 0;
+}
 
-  /// Function to compare two display objects via their [ZOrder] (if they
-  /// implement it).
-  static int compare(a, b) {
-    if (a is ZOrder) {
-      if (b is ZOrder) {
-        ZOrder aOrder = a as ZOrder;
-        ZOrder bOrder = b as ZOrder;
 
-        if (aOrder.layer != bOrder.layer) {
-          return aOrder.layer.compareTo(bOrder.layer);
-
-        } else {
-          // Same layer. Must compare z-index.
-          return aOrder.zIndex.compareTo(bOrder.zIndex);
-        }
-
+/// Function to compare two [DisplayObject]s via their layer and zIndex if 
+/// they implement [DisplayObjectZ].
+int _displayObjectCompare(DisplayObject a, DisplayObject b) {
+  if (a is DisplayObjectZ) {
+    if (b is DisplayObjectZ) {
+      if (a.layer !=b.layer) {
+        return a.layer.compareTo(b.layer);
       } else {
-        // b is not a ZOrder.
-        return -1;
+        // Same layer. Must compare z-index.
+        return a.zIndex.compareTo(b.zIndex);
       }
 
     } else {
-      // a is not a ZOrder.
-      return 1;
+      // b is not a DisplayObjectZ.
+      return -1;
     }
+
+  } else {
+    // a is not a DisplayObjectZ.
+    return 1;
   }
 }

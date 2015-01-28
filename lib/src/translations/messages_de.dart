@@ -4,27 +4,27 @@ class MessagesDe extends Messages {
 
   @override
   String cantMoveBecauseNoField() =>
-      "Der Spieler kann sich nicht bewegen, da es kein Feld mehr hat!";
+      "Ich kann mich nicht bewegen, da es kein Feld mehr hat!";
 
   @override
   String cantMoveBecauseOfTree() =>
-      "Der Spieler kann sich nicht bewegen wegen einem Baum!";
+      "Ich kann mich nicht bewegen wegen einem Baum!";
 
   @override
   String cantMoveBecauseOfBox() =>
-      "Der Spieler kann sich nicht bewegen, da die Box nicht geschoben werden kann!";
+      "Ich kann mich nicht bewegen, da ich die Box nicht schieben kann!";
 
   @override
   String cantPutStar() =>
-      "Der Spieler kann keinen Stern auf ein Feld legen, auf dem schon einer ist!";
+      "Ich kann keinen Stern auf ein Feld legen, auf dem schon einer ist!";
 
   @override
   String cantRemoveStar() =>
-      "Der Spieler kann hier keinen Stern auflesen!";
+      "Ich kann hier keinen Stern auflesen!";
 
   @override
   String playerExceptionDefault() =>
-      "Der Spieler hat irgendein Problem!";
+      "Ich habe irgend ein Problem, weiss aber nicht genau was. Sorry!";
 
   @override
   String actionOverflowException() =>
@@ -33,6 +33,7 @@ class MessagesDe extends Messages {
   @override
   String fileNotFoundException() =>
       "Eine Datei konnte nicht geladen werden. Bitte überprüfe die Bilder oder die Szenario-Datei.";
+  
   @override
   String scenarioInvalid() => "Das Szenario ist ungültig.";
 }

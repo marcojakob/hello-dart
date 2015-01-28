@@ -3,22 +3,22 @@ part of hello_dart;
 class Messages {
 
   String cantMoveBecauseNoField() =>
-      "The player can't move because there is no field!";
+      "I can't move because there is no field!";
 
   String cantMoveBecauseOfTree() =>
-      "The player can't move because of a tree!";
+      "I can't move because of a tree!";
 
   String cantMoveBecauseOfBox() =>
-      "The player can't move because the box can't be pushed!";
+      "I can't move because the box can't be pushed!";
 
   String cantPutStar() =>
-      "The player can't put a star on top of another star!";
+      "I can't put a star on top of another star!";
 
   String cantRemoveStar() =>
-      "There is no star that the player could remove here!";
+      "There is no star that I could remove!";
 
   String playerExceptionDefault() =>
-      "The player has some problem!";
+      "I have a problem, but I don't know what it is, sorry!";
 
   String actionOverflowException() =>
       "Your program takes too long to execute or doesn't end at all!";
