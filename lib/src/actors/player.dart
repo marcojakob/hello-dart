@@ -202,6 +202,7 @@ abstract class Player extends Actor {
   /// Creates a speech bubble with the specified [text].
   /// 
   /// The [seconds] specifies how long the text should appear on the screen.
+  /// If [seconds] is set to -1, the speech bubble will stay on the screen.
   void say(String text, [num seconds = 3]) {
     Point playerPixelCopy = World.cellToPixel(x, y);
     
