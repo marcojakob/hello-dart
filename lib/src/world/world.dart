@@ -15,9 +15,11 @@ class World extends Sprite {
   static int marginTop = 80;
   static int marginBottom = 46;
 
-  /// The maximum number of calls to the player's action methods that are
-  /// allowed.
-  static const int maxActions = 10000;
+  /// The maximum number of allowed calls to the player's action methods.
+  static const int maxActionCalls = 10000;
+
+  /// The maximum number of allowed calls to the player's sensor methods.
+  static const int maxSensorCalls = 100000;
 
   /// The scenario of this world.
   Scenario scenario;
@@ -77,12 +79,18 @@ class World extends Sprite {
   /// A Queue of player actions waiting to be executed.
   final Queue<PlayerAction> _actionQueue = new Queue();
 
+  /// A counter to detect infinite loops in sensor methods.
+  ///
+  /// When a large number of method calls are detected without any changes on
+  /// screen, we can assume that the user's program does not terminate.
+  int _sensorCallCounter = 0;
+
   /// The subscription for enter frame events.
   StreamSubscription _enterFrameSub;
 
   /// The time when the next action may be executed, in seconds.
   num _nextActionTime = 0;
-  
+
   /// The animatable of the currently executing action.
   Animatable _actionAnimatable;
 
@@ -118,6 +126,14 @@ class World extends Sprite {
 
       // Init the stage.
       _initStage();
+
+      // Init the render loop and juggler.
+      renderLoop = new RenderLoop()
+          ..addStage(stage);
+      juggler = renderLoop.juggler;
+
+      // The first execution should wait one cycle for the user to see it.
+      _nextActionTime = speed;
 
       // Init the speed slider.
       _initSpeedSlider();
@@ -157,22 +173,38 @@ class World extends Sprite {
     });
   }
 
-  /// Renders the current world state with [actors] and [player].
-  ///
-  /// Note: The rendering is not done immediately. The current world state is
-  /// added to a queue where itmes are rendered with a fixed delay between them.
+  /// Queues the specified [action] to be executed at a later time.
   void queueAction(PlayerAction action) {
     // Add the current world state at the end of the queue.
     _actionQueue.add(action);
 
-    if (_actionQueue.length > maxActions) {
-      // The maximum number of actions during one act()-call has been reached.
-      throw new ActionOverflowException(messages.actionOverflowException());
+    if (_actionQueue.length > maxActionCalls) {
+      // The maximum number of action method calls during one act()-call has
+      // been reached.
+      throw new OverflowException(messages.actionOverflowException());
+    }
+  }
+
+  /// Detects an infinite loop and terminates.
+  ///
+  /// There are two
+  /// When a large number of method calls are detected without any changes on
+  /// screen (sensor methods), we can assume that the user's program does not
+  /// terminate.
+  void _detectSensorCallOverflow() {
+    _sensorCallCounter++;
+
+    if (_sensorCallCounter > maxSensorCalls) {
+      // The maximum number of sensor method calls during one act()-call has
+      // been reached.
+      throw new OverflowException(messages.actionOverflowException());
     }
   }
 
   /// Returns the field at the specified location or null, if there is no field.
   Field getFieldAt(int x, int y) {
+    _detectSensorCallOverflow();
+
     return fields.firstWhere((field) => field.x == x && field.y == y,
         orElse: () => null);
   }
@@ -181,6 +213,8 @@ class World extends Sprite {
   /// Returns the field that is a number of [steps] away from [x], [y]
   /// in the specified [direction].
   Field getFieldInFront(int x, int y, Direction direction, [int steps = 1]) {
+    _detectSensorCallOverflow();
+
     Point p = World.getPointInFront(x, y, direction, steps);
 
     return getFieldAt(p.x, p.y);
@@ -188,6 +222,8 @@ class World extends Sprite {
 
   /// Returns a list of actors at the specified location.
   List<Actor> getActorsAt(int x, int y) {
+    _detectSensorCallOverflow();
+
     return actors.where((Actor actor) => actor.x == x && actor.y == y)
         .toList(growable: false);
   }
@@ -195,6 +231,8 @@ class World extends Sprite {
   /// Returns a list of actors that are a number of [steps] away from [x], [y]
   /// in the specified [direction].
   List<Actor> getActorsInFront(int x, int y, Direction direction, [int steps = 1]) {
+    _detectSensorCallOverflow();
+
     Point p = World.getPointInFront(x, y, direction, steps);
 
     return getActorsAt(p.x, p.y);
@@ -235,7 +273,7 @@ class World extends Sprite {
         ..addBitmapData('tree', '${imagesDir}/tree.png')
         ..addTextureAtlas('character', '${imagesDir}/${character}.json',
             TextureAtlasFormat.JSONARRAY)
-        ..addTextureAtlas('speech-bubble', '${imagesDir}/speech-bubble.json', 
+        ..addTextureAtlas('speech-bubble', '${imagesDir}/speech-bubble.json',
             TextureAtlasFormat.JSONARRAY)
         ..addTextFile('scenario', scenarioFile);
 
@@ -308,10 +346,6 @@ class World extends Sprite {
         alpha: true,
         webGL: true);
     stage.backgroundColor = 0x00; // First two numbers after x are transparency.
-
-    renderLoop = new RenderLoop()
-        ..addStage(stage);
-    juggler = renderLoop.juggler;
   }
 
   /// Draws the worlds background.
@@ -372,7 +406,7 @@ class World extends Sprite {
   /// Converts the speed [value] (in seconds) to a slider value.
   int _logValueToSlider(num value) {
     num ms = value * 1000;
-    
+
     int minSlider = 0;
     int maxSlider = 100;
 
@@ -395,22 +429,28 @@ class World extends Sprite {
       // Test if the time is ready.
       if (currentTime > _nextActionTime) {
         // Test if last action is still animating in the juggler.
-        if (_actionAnimatable != null && 
-            juggler.contains(_actionAnimatable) && 
+        if (_actionAnimatable != null &&
+            juggler.contains(_actionAnimatable) &&
             _actionAnimatable.advanceTime(0.01)) {
           return;
         }
-        
+
+        // ---
+        // We can execute the next action.
+        // ---
         _nextActionTime = currentTime + speed;
+
+        // Resets the sensor method call counter.
+        _sensorCallCounter = 0;
 
         PlayerAction action = _actionQueue.removeFirst();
         try {
           // Only use 70% of the duration for the actual action to allow a break.
           double actionDuration = speed * .7;
-          
+
           // Execute the player action.
           _actionAnimatable = action(actionDuration);
-          
+
           if (_actionAnimatable != null) {
             juggler.add(_actionAnimatable);
           }
@@ -454,8 +494,8 @@ class World extends Sprite {
 /// The type for a [Player] action function.
 ///
 /// The [duration] is the time that is available to the action (in seconds).
-/// 
-/// The function must return an [Animatable] or null if there is nothing to 
+///
+/// The function must return an [Animatable] or null if there is nothing to
 /// be animated.
 typedef Animatable PlayerAction(double duration);
 
@@ -464,10 +504,10 @@ typedef Animatable PlayerAction(double duration);
 class BitmapZ extends Bitmap implements DisplayObjectZ {
   @override
   int layer = 0;
-  
+
   @override
   int zIndex = 0;
-  
+
   BitmapZ([BitmapData bitmapData = null]) : super(bitmapData);
 }
 
@@ -475,33 +515,33 @@ class BitmapZ extends Bitmap implements DisplayObjectZ {
 class FlipBookZ extends FlipBook implements DisplayObjectZ {
   @override
   int layer = 0;
-  
+
   @override
   int zIndex = 0;
-  
+
   FlipBookZ(List<BitmapData> bitmapDatas, [int frameRate = 30, bool loop = true]) :
     super(bitmapDatas, frameRate, loop);
-  
-  /// TODO: This only a hack because of bug 
+
+  /// TODO: This only a hack because of bug
   /// https://github.com/bp74/StageXL/issues/178
   /// Should be removed when the bug is fixed.
   @override
   bool advanceTime(num time) {
     bool result = super.advanceTime(time);
-    
+
     if (!loop && currentFrame == totalFrames - 1) {
       return false;
     }
-    
+
     return result;
   }
 }
 
 /// Extends [Sprite] to have a z-order.
-class SpriteZ extends Sprite implements DisplayObjectZ {  
+class SpriteZ extends Sprite implements DisplayObjectZ {
   @override
   int layer = 0;
-  
+
   @override
   int zIndex = 0;
 }
@@ -519,7 +559,7 @@ abstract class DisplayObjectZ extends DisplayObject {
 }
 
 
-/// Function to compare two [DisplayObject]s via their layer and zIndex if 
+/// Function to compare two [DisplayObject]s via their layer and zIndex if
 /// they implement [DisplayObjectZ].
 int _displayObjectCompare(DisplayObject a, DisplayObject b) {
   if (a is DisplayObjectZ) {

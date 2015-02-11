@@ -4,7 +4,7 @@ part of hello_dart;
 ///
 /// Your program should be written in a subclass of this class.
 abstract class Player extends Actor {
-  
+
   /// The direction of this actor.
   Direction direction = Direction.right;
 
@@ -19,13 +19,13 @@ abstract class Player extends Actor {
     // Ensure there is a field in front.
     if (world.getFieldInFront(x, y, direction) == null) {
       say(messages.cantMoveBecauseNoField(), -1);
-      _stop();
+      stop();
     }
 
     // Ensure there is no tree.
     if (treeFront()) {
       say(messages.cantMoveBecauseOfTree(), -1);
-      _stop();
+      stop();
     }
 
     // Check for a box. If there is a box, ensure it can be moved.
@@ -66,7 +66,7 @@ abstract class Player extends Actor {
       } else {
         // Could not push the box.
         say(messages.cantMoveBecauseOfBox(), -1);
-        _stop();
+        stop();
       }
     } else {
       Point startPointCopy = new Point(x, y);
@@ -117,29 +117,29 @@ abstract class Player extends Actor {
 
   /// The player checks if he/she can move to the next field.
   bool canMove() {
-    
+
     // Ensure there is a field in front.
     if (world.getFieldInFront(x, y, direction) == null) {
       return false;
     }
-    
+
     // Ensure there is no tree.
     if (treeFront()) {
       return false;
     }
-    
+
     // Check for a box. If there is a box, ensure it can be moved.
     Box box = world.getActorsInFront(x, y, direction)
         .firstWhere((Actor a) => a is Box, orElse: () => null);
-    
+
     if (box != null && !box.canMove(direction)) {
-      return false; 
+      return false;
     }
-    
+
     // Nothing in the way, we can move.
     return true;
   }
-  
+
   /// The player checks if there is a tree in front.
   bool treeFront() {
     return world.getActorsInFront(x, y, direction).any((Actor a) => a is Tree);
@@ -173,7 +173,7 @@ abstract class Player extends Actor {
       });
     } else {
       say(messages.cantPutStar(), -1);
-      _stop();
+      stop();
     }
   }
 
@@ -190,7 +190,7 @@ abstract class Player extends Actor {
       });
     } else {
       say(messages.cantPutStar(), -1);
-      _stop();
+      stop();
     }
   }
 
@@ -198,37 +198,37 @@ abstract class Player extends Actor {
   bool onStar() {
     return world.getActorsAt(x, y).any((Actor a) => a is Star);
   }
-  
+
   /// Creates a speech bubble with the specified [text].
-  /// 
+  ///
   /// The [seconds] specifies how long the text should appear on the screen.
   /// If [seconds] is set to -1, the speech bubble will stay on the screen.
   void say(String text, [num seconds = 3]) {
     Point playerPixelCopy = World.cellToPixel(x, y);
-    
+
     world.queueAction((duration) {
-      
+
       bool bubbleLeft = false;
       if (playerPixelCopy.x > world.widthInPixels / 2) {
-        bubbleLeft = true;        
+        bubbleLeft = true;
       }
-      
+
       var textField = _createTextField(text, bubbleLeft);
-      var bubble = _createSpeechBubble(textField.width - 4, 
+      var bubble = _createSpeechBubble(textField.width - 4,
           bubbleLeft);
-      
+
       SpriteZ speechBubble = new SpriteZ()
         ..layer = world.heightInCells // Position on top of everything.
         ..y = playerPixelCopy.y - 120
         ..addChild(bubble)
         ..addChild(textField);
-      
+
       if (bubbleLeft) {
         speechBubble.x = playerPixelCopy.x - 40 - speechBubble.width;
       } else {
         speechBubble.x = playerPixelCopy.x + 40;
       }
-      
+
       world.addChildAtZOrder(speechBubble);
 
       if (seconds > -1) {
@@ -239,7 +239,7 @@ abstract class Player extends Actor {
       }
     });
   }
-  
+
   /// Creates a text field.
   TextField _createTextField(String text, bool bubbleLeft) {
     // Only allow 4 lines of text.
@@ -248,57 +248,57 @@ abstract class Player extends Actor {
       lines.removeRange(4, lines.length);
     }
     text = lines.join('\n');
-    
+
     var marginTop = 0;
     switch (lines.length){
-      case 1: 
+      case 1:
         marginTop = 29;
         break;
       case 2:
         marginTop = 19;
         break;
-      case 3: 
+      case 3:
         marginTop = 9;
     }
-    
+
     var textField = new TextField()
       ..defaultTextFormat = new TextFormat(
-          'Helvetica Neue, Helvetica, Arial, sans-serif', 15, 
+          'Helvetica Neue, Helvetica, Arial, sans-serif', 15,
           Color.Black, bold: true)
       ..text = text
       ..x = bubbleLeft ? 13 : 17
       ..y = 10 + marginTop
       ..autoSize = TextFieldAutoSize.LEFT;
-    
+
     return textField;
   }
-  
+
   /// Creates a speech bubble for this player.
   Bitmap _createSpeechBubble(int width, bool bubbleLeft) {
     var atlas = world.resourceManager.getTextureAtlas('speech-bubble');
-    
+
     var bubbleBitmap = new BitmapData(34 + width, 106, true, 0x00);
-    
-    bubbleBitmap.drawPixels(atlas.getBitmapData('left'), 
+
+    bubbleBitmap.drawPixels(atlas.getBitmapData('left'),
         new Rectangle(0, 0, 20, 106), new Point(0, 0));
-    
+
     var centerData = atlas.getBitmapData('center');
     for (int i = 0; i < width; i++) {
-      bubbleBitmap.drawPixels(centerData, new Rectangle(0, 0, 1, 106), 
+      bubbleBitmap.drawPixels(centerData, new Rectangle(0, 0, 1, 106),
         new Point(i + 20, 0));
     }
-    
-    bubbleBitmap.drawPixels(atlas.getBitmapData('right'), 
+
+    bubbleBitmap.drawPixels(atlas.getBitmapData('right'),
         new Rectangle(0, 0, 14, 106), new Point(20 + width, 0));
-    
+
     var bubble = new Bitmap(bubbleBitmap);
-    
+
     if (bubbleLeft) {
       // Mirror the bubble to the left side.
       bubble.scaleX = -1;
       bubble.x = bubbleBitmap.width;
     }
-    
+
     return bubble;
   }
 
@@ -312,12 +312,12 @@ abstract class Player extends Actor {
   int get zIndex => 4;
 
   /// Stops the execution.
-  void _stop() {
+  void stop() {
     // We throw an exception here because it is the only way to immediately
     // leave an executing method.
     throw new StopException();
   }
-  
+
   /// Returns the next direction when turning clockwise.
   Direction get _nextDirectionClockwise =>
       Direction.values[(direction.index + 1) % Direction.values.length];
@@ -355,7 +355,7 @@ abstract class Player extends Actor {
       ..pivotY = _bitmap.pivotY
       ..mouseEnabled = false
       ..play();
-    
+
 
     // Create the move tween.
     Tween tween = new Tween(flipBook, duration,
@@ -375,11 +375,11 @@ abstract class Player extends Actor {
         _bitmap.layer = targetPoint.y;
         _bitmapAddToWorld();
       };
-      
+
     AnimationGroup animGroup = new AnimationGroup();
     animGroup.add(tween);
     animGroup.add(flipBook);
-    
+
     return animGroup;
   }
 

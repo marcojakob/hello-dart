@@ -23,10 +23,12 @@ class PlayerException implements HelloDartException {
 }
 
 /// Exception that is thrown when the user created a start()-method that does
-/// not terminate in a reasonable time. That means it calls more than the
-/// allowed number of [Player] action methods ([World.maxActions]).
-class ActionOverflowException extends PlayerException {
-  ActionOverflowException([String message = '']) : super(message);
+/// not terminate in a reasonable time.
+///
+/// That means it calls more than the allowed number of [Player] action methods
+/// ([World.maxActionCalls]) or sensor methods ([World.maxSensorCalls]).
+class OverflowException extends PlayerException {
+  OverflowException([String message = '']) : super(message);
 }
 
 /// Exception used to stop the execution inside the start()-method.
