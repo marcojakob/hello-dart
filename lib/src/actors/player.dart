@@ -189,7 +189,7 @@ abstract class Player extends Actor {
         star._bitmapRemoveFromWorld();
       });
     } else {
-      say(messages.cantPutStar(), -1);
+      say(messages.cantRemoveStar(), -1);
       stop();
     }
   }
