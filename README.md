@@ -3,6 +3,11 @@
 Hello Dart is a visual and playful introduction to programming with Dart.
 
 
+## Instructions
+
+* [Hello Dart Tutorial (in German)](http://code.makery.ch/library/hello-dart/de)
+
+
 ## Attribution
 
 * [Planet Cute](http://www.lostgarden.com/2007/05/dancs-miraculously-flexible-game.html) 
@@ -15,4 +20,5 @@ Many thanks to Daniel and Oleg!
 
 
 ## License
+
 The MIT License (MIT)
