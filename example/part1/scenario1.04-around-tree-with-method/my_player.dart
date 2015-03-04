@@ -5,11 +5,6 @@ class MyPlayer extends Player {
 
   /// Your program.
   start() {
-    move();
-    turnLeft();
-    move();
-    turnRight();
-    move();
   }
 
 }
