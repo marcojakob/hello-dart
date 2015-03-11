@@ -1,5 +1,5 @@
 name: hello_dart
-version: 0.1.0
+version: 0.1.0+1
 author: Marco Jakob <majakob@gmx.ch>
 description: A visual and playful introduction to programming with Dart.
 homepage: http://code.makery.ch/library/hello-dart/

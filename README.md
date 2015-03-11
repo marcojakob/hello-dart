@@ -1,6 +1,15 @@
 # Hello Dart
 
-Hello Dart is a visual and playful introduction to programming with Dart.
+Hello Dart is a visual and playful introduction to programming with Dart. It's
+your visual hello world for Dart.
+
+[![Star this Repo](https://img.shields.io/github/stars/marcojakob/hello-dart.svg?style=flat-square)](https://github.com/marcojakob/hello-dart)
+[![Pub Package](https://img.shields.io/pub/v/hello_dart.svg?style=flat-square)](https://pub.dartlang.org/packages/hello_dart)
+[![Build Status](https://drone.io/github.com/marcojakob/dart-dnd/status.png)](https://drone.io/github.com/marcojakob/dart-dnd/latest)
+
+[GitHub](https://github.com/marcojakob/hello-dart) | 
+[Pub](https://pub.dartlang.org/packages/hello_dart) | 
+[Course Materials](http://code.makery.ch/library/hello-dart/)
 
 
 ## Course Materials
@@ -173,7 +182,7 @@ art by Daniel Cook (Lostgarden.com)
 "Planet Cute" theme with additional sprite perspectives. He was so kind to provide
 his graphics.
 * The sprites have been combined and optimized with 
-[TexturePacker](http://www.codeandweb.com/texturepacker)
+[TexturePacker](http://www.codeandweb.com/texturepacker).
 
 Many thanks to Daniel and Oleg!
 
