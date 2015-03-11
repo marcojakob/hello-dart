@@ -1,7 +1,7 @@
 # Hello Dart
 
 Hello Dart is a visual and playful introduction to programming with Dart. It's
-your visual hello world for Dart.
+your visual **hello world** for Dart.
 
 [![Star this Repo](https://img.shields.io/github/stars/marcojakob/hello-dart.svg?style=flat-square)](https://github.com/marcojakob/hello-dart)
 [![Pub Package](https://img.shields.io/pub/v/hello_dart.svg?style=flat-square)](https://pub.dartlang.org/packages/hello_dart)
@@ -9,6 +9,8 @@ your visual hello world for Dart.
 [GitHub](https://github.com/marcojakob/hello-dart) | 
 [Pub](https://pub.dartlang.org/packages/hello_dart) | 
 [Course Materials](http://code.makery.ch/library/hello-dart/)
+
+![Hello Dart Screenshot](https://raw.githubusercontent.com/marcojakob/hello-dart/master/doc/hello-dart-animation.gif)
 
 
 ## Course Materials
