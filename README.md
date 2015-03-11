@@ -5,7 +5,6 @@ your visual hello world for Dart.
 
 [![Star this Repo](https://img.shields.io/github/stars/marcojakob/hello-dart.svg?style=flat-square)](https://github.com/marcojakob/hello-dart)
 [![Pub Package](https://img.shields.io/pub/v/hello_dart.svg?style=flat-square)](https://pub.dartlang.org/packages/hello_dart)
-[![Build Status](https://drone.io/github.com/marcojakob/dart-dnd/status.png)](https://drone.io/github.com/marcojakob/dart-dnd/latest)
 
 [GitHub](https://github.com/marcojakob/hello-dart) | 
 [Pub](https://pub.dartlang.org/packages/hello_dart) | 
