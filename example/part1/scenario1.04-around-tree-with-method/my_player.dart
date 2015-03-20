@@ -5,8 +5,13 @@ class MyPlayer extends Player {
 
   /// Your program.
   start() {
+    move();
+    goAroundTree();
   }
 
+  goAroundTree() {
+
+  }
 }
 
 
