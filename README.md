@@ -18,7 +18,8 @@ your visual **hello world** for Dart.
 Hello Dart contains free materials for a complete introductory course in 
 programming. It includes theory, instructions, exercises, and solutions.
 
-* [Hello Dart Course (in German)](http://code.makery.ch/library/hello-dart/de)
+* [Hello Dart Course (in English)](http://code.makery.ch/library/hello-dart/)
+* [Hello Dart Course (in German)](http://code.makery.ch/library/hello-dart/de/)
 
 
 ## How it Works
