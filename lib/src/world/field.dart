@@ -2,7 +2,6 @@ part of hello_dart;
 
 /// A background field.
 class Field {
-
   /// A reference to the world.
   World world;
 

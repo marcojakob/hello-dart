@@ -4,7 +4,6 @@ part of hello_dart;
 ///
 /// Your program should be written in a subclass of this class.
 abstract class Player extends Actor {
-
   /// The direction of this actor.
   Direction direction = Direction.right;
 
@@ -29,22 +28,22 @@ abstract class Player extends Actor {
     }
 
     // Check for a box. If there is a box, ensure it can be moved.
-    Box box = world.getActorsInFront(x, y, direction)
+    Box box = world
+        .getActorsInFront(x, y, direction)
         .firstWhere((Actor a) => a is Box, orElse: () => null);
 
     if (box != null) {
       // Check if the box can be pushed to the next field.
       if (box.canMove(direction)) {
-
-        Point boxStartPointCopy = new Point(box.x, box.y);
-        Point playerStartPointCopy = new Point(x, y);
+        Point<int> boxStartPointCopy = new Point(box.x, box.y);
+        Point<int> playerStartPointCopy = new Point(x, y);
 
         // Push the box and move the player.
         box._move(direction);
         _move(direction);
 
-        Point boxTargetPointCopy = new Point(box.x, box.y);
-        Point playerTargetPointCopy = new Point(x, y);
+        Point<int> boxTargetPointCopy = new Point(box.x, box.y);
+        Point<int> playerTargetPointCopy = new Point(x, y);
 
         // Copy the current box image name and the player's direction.
         var boxImage = box.image;
@@ -52,34 +51,31 @@ abstract class Player extends Actor {
 
         world.queueAction((duration) {
           AnimationGroup animGroup = new AnimationGroup();
-          animGroup.add(box._bitmapMoveAnimation(boxStartPointCopy,
-                                                 boxTargetPointCopy,
-                                                 directionCopy, duration));
+          animGroup.add(box._bitmapMoveAnimation(
+              boxStartPointCopy, boxTargetPointCopy, directionCopy, duration));
           animGroup.add(box._bitmapUpdateImage(boxImage, duration));
           animGroup.add(_bitmapMoveAnimation(playerStartPointCopy,
-                                             playerTargetPointCopy,
-                                             directionCopy, duration));
+              playerTargetPointCopy, directionCopy, duration));
 
           return animGroup;
         });
-
       } else {
         // Could not push the box.
         say(messages.cantMoveBecauseOfBox(), -1);
         stop();
       }
     } else {
-      Point startPointCopy = new Point(x, y);
+      Point<int> startPointCopy = new Point(x, y);
 
       // Nothing in the way, the player can move.
       _move(direction);
 
-      Point targetPointCopy = new Point(x, y);
+      Point<int> targetPointCopy = new Point(x, y);
       Direction directionCopy = direction;
 
       world.queueAction((duration) {
-        return _bitmapMoveAnimation(startPointCopy, targetPointCopy,
-            directionCopy, duration);
+        return _bitmapMoveAnimation(
+            startPointCopy, targetPointCopy, directionCopy, duration);
       });
     }
   }
@@ -94,8 +90,9 @@ abstract class Player extends Actor {
     var endDirectionCopy = direction;
 
     world.queueAction((duration) {
-      return _bitmapTurnAnimation(startDirectionCopy, endDirectionCopy,
-          duration, clockwise: false);
+      return _bitmapTurnAnimation(
+          startDirectionCopy, endDirectionCopy, duration,
+          clockwise: false);
     });
   }
 
@@ -107,17 +104,16 @@ abstract class Player extends Actor {
     direction = _nextDirectionClockwise;
 
     var endDirectionCopy = direction;
-    var bitmapCopy = image;
 
     world.queueAction((duration) {
-      return _bitmapTurnAnimation(startDirectionCopy, endDirectionCopy,
-          duration, clockwise: true);
+      return _bitmapTurnAnimation(
+          startDirectionCopy, endDirectionCopy, duration,
+          clockwise: true);
     });
   }
 
   /// The player checks if he/she can move to the next field.
   bool canMove() {
-
     // Ensure there is a field in front.
     if (world.getFieldInFront(x, y, direction) == null) {
       return false;
@@ -129,7 +125,8 @@ abstract class Player extends Actor {
     }
 
     // Check for a box. If there is a box, ensure it can be moved.
-    Box box = world.getActorsInFront(x, y, direction)
+    Box box = world
+        .getActorsInFront(x, y, direction)
         .firstWhere((Actor a) => a is Box, orElse: () => null);
 
     if (box != null && !box.canMove(direction)) {
@@ -147,13 +144,15 @@ abstract class Player extends Actor {
 
   /// The player checks if there is a tree on the left side.
   bool treeLeft() {
-    return world.getActorsInFront(x, y, _nextDirectionCounterclockwise)
+    return world
+        .getActorsInFront(x, y, _nextDirectionCounterclockwise)
         .any((Actor a) => a is Tree);
   }
 
   /// The player checks if there is a tree on the right side.
   bool treeRight() {
-    return world.getActorsInFront(x, y, _nextDirectionClockwise)
+    return world
+        .getActorsInFront(x, y, _nextDirectionClockwise)
         .any((Actor a) => a is Tree);
   }
 
@@ -179,8 +178,9 @@ abstract class Player extends Actor {
 
   /// The player removes a star.
   void removeStar() {
-    Star star = world.getActorsAt(x, y).firstWhere((Actor a) => a is Star,
-        orElse: () => null);
+    Star star = world
+        .getActorsAt(x, y)
+        .firstWhere((Actor a) => a is Star, orElse: () => null);
 
     if (star != null) {
       world.actors.remove(star);
@@ -204,18 +204,16 @@ abstract class Player extends Actor {
   /// The [seconds] specifies how long the text should appear on the screen.
   /// If [seconds] is set to -1, the speech bubble will stay on the screen.
   void say(String text, [num seconds = 3]) {
-    Point playerPixelCopy = World.cellToPixel(x, y);
+    Point<int> playerPixelCopy = World.cellToPixel(x, y);
 
     world.queueAction((duration) {
-
       bool bubbleLeft = false;
       if (playerPixelCopy.x > world.widthInPixels / 2) {
         bubbleLeft = true;
       }
 
       var textField = _createTextField(text, bubbleLeft);
-      var bubble = _createSpeechBubble(textField.width - 4,
-          bubbleLeft);
+      var bubble = _createSpeechBubble(textField.width - 4, bubbleLeft);
 
       SpriteZ speechBubble = new SpriteZ()
         ..layer = world.heightInCells // Position on top of everything.
@@ -250,7 +248,7 @@ abstract class Player extends Actor {
     text = lines.join('\n');
 
     var marginTop = 0;
-    switch (lines.length){
+    switch (lines.length) {
       case 1:
         marginTop = 29;
         break;
@@ -263,8 +261,8 @@ abstract class Player extends Actor {
 
     var textField = new TextField()
       ..defaultTextFormat = new TextFormat(
-          'Helvetica Neue, Helvetica, Arial, sans-serif', 15,
-          Color.Black, bold: true)
+          'Helvetica Neue, Helvetica, Arial, sans-serif', 15, Color.Black,
+          bold: true)
       ..text = text
       ..x = bubbleLeft ? 13 : 17
       ..y = 10 + marginTop
@@ -274,18 +272,18 @@ abstract class Player extends Actor {
   }
 
   /// Creates a speech bubble for this player.
-  Bitmap _createSpeechBubble(int width, bool bubbleLeft) {
+  Bitmap _createSpeechBubble(num width, bool bubbleLeft) {
     var atlas = world.resourceManager.getTextureAtlas('speech-bubble');
 
-    var bubbleBitmap = new BitmapData(34 + width, 106, true, 0x00);
+    var bubbleBitmap = new BitmapData(34 + width, 106, 0x00);
 
     bubbleBitmap.drawPixels(atlas.getBitmapData('left'),
         new Rectangle(0, 0, 20, 106), new Point(0, 0));
 
     var centerData = atlas.getBitmapData('center');
     for (int i = 0; i < width; i++) {
-      bubbleBitmap.drawPixels(centerData, new Rectangle(0, 0, 1, 106),
-        new Point(i + 20, 0));
+      bubbleBitmap.drawPixels(
+          centerData, new Rectangle(0, 0, 1, 106), new Point(i + 20, 0));
     }
 
     bubbleBitmap.drawPixels(atlas.getBitmapData('right'),
@@ -304,7 +302,8 @@ abstract class Player extends Actor {
 
   @override
   BitmapData get image {
-    return world.resourceManager.getTextureAtlas('character')
+    return world.resourceManager
+        .getTextureAtlas('character')
         .getBitmapData('${direction}-0');
   }
 
@@ -327,15 +326,21 @@ abstract class Player extends Actor {
       Direction.values[(direction.index - 1) % Direction.values.length];
 
   @override
-  Animatable _bitmapMoveAnimation(Point startPoint, Point targetPoint,
-                                  Direction direction, double duration) {
-    Point targetPixel = World.cellToPixel(targetPoint.x, targetPoint.y);
+  Animatable _bitmapMoveAnimation(Point<int> startPoint, Point<int> targetPoint,
+      Direction direction, double duration) {
+    Point<int> targetPixel = World.cellToPixel(targetPoint.x, targetPoint.y);
 
-    List bitmapDatas = world.resourceManager.getTextureAtlas('character')
+    List<BitmapData> bitmapDatas = world.resourceManager
+        .getTextureAtlas('character')
         .getBitmapDatas('${direction}');
 
     // Create the walk cycle.
-    var walkCycle = [bitmapDatas[1], bitmapDatas[0], bitmapDatas[2], bitmapDatas[0]];
+    var walkCycle = [
+      bitmapDatas[1],
+      bitmapDatas[0],
+      bitmapDatas[2],
+      bitmapDatas[0]
+    ];
 
     // Calculate the flip book frame rate.
     int frameRate = (walkCycle.length / duration).ceil();
@@ -356,10 +361,8 @@ abstract class Player extends Actor {
       ..mouseEnabled = false
       ..play();
 
-
     // Create the move tween.
-    Tween tween = new Tween(flipBook, duration,
-        TransitionFunction.linear)
+    Tween tween = new Tween(flipBook, duration, Transition.linear)
       ..animate.x.to(targetPixel.x)
       ..animate.y.to(targetPixel.y)
       ..onStart = () {
@@ -372,7 +375,7 @@ abstract class Player extends Actor {
         // Add bitmap again.
         _bitmap.x = targetPixel.x;
         _bitmap.y = targetPixel.y;
-        _bitmap.layer = targetPoint.y;
+        _bitmap.layer = targetPoint.y.toInt();
         _bitmapAddToWorld();
       };
 
@@ -384,15 +387,15 @@ abstract class Player extends Actor {
   }
 
   @override
-  Animatable _bitmapTurnAnimation(Direction startDirection,
-                                  Direction endDirection, double duration,
-                                  {bool clockwise: true}) {
-
-    List endImages = world.resourceManager.getTextureAtlas('character')
+  Animatable _bitmapTurnAnimation(
+      Direction startDirection, Direction endDirection, double duration,
+      {bool clockwise: true}) {
+    List<BitmapData> endImages = world.resourceManager
+        .getTextureAtlas('character')
         .getBitmapDatas('${endDirection}');
 
     // Create the turn cycle.
-    var turnCycle;
+    List<BitmapData> turnCycle;
 
     if (clockwise) {
       turnCycle = [endImages[2], endImages[0]];
@@ -405,17 +408,16 @@ abstract class Player extends Actor {
 
     // Create walking flip book.
     var flipBook = new FlipBookZ(turnCycle, frameRate, false)
-            ..x = _bitmap.x
-            ..y = _bitmap.y
-            ..layer = _bitmap.layer
-            ..zIndex = _bitmap.zIndex
-            ..pivotX = _bitmap.pivotX
-            ..pivotY = _bitmap.pivotY
-            ..mouseEnabled = false
-            ..play();
+      ..x = _bitmap.x
+      ..y = _bitmap.y
+      ..layer = _bitmap.layer
+      ..zIndex = _bitmap.zIndex
+      ..pivotX = _bitmap.pivotX
+      ..pivotY = _bitmap.pivotY
+      ..mouseEnabled = false
+      ..play();
 
-    Tween tween = new Tween(flipBook, duration,
-        TransitionFunction.linear)
+    Tween tween = new Tween(flipBook, duration, Transition.linear)
       ..onStart = () {
         _bitmapRemoveFromWorld();
         world.addChildAtZOrder(flipBook);

@@ -1,7 +1,6 @@
 part of hello_dart;
 
 class MessagesDe extends Messages {
-
   @override
   String cantMoveBecauseNoField() =>
       "Ich kann mich nicht bewegen, da es kein Feld mehr hat!";
@@ -19,8 +18,7 @@ class MessagesDe extends Messages {
       "Ich kann keinen Stern auf ein Feld legen, auf dem schon einer ist!";
 
   @override
-  String cantRemoveStar() =>
-      "Ich kann hier keinen Stern auflesen!";
+  String cantRemoveStar() => "Ich kann hier keinen Stern auflesen!";
 
   @override
   String playerExceptionDefault() =>
@@ -33,7 +31,7 @@ class MessagesDe extends Messages {
   @override
   String fileNotFoundException() =>
       "Eine Datei konnte nicht geladen werden. Bitte überprüfe die Bilder oder die Szenario-Datei.";
-  
+
   @override
   String scenarioInvalid() => "Das Szenario ist ungültig.";
 }

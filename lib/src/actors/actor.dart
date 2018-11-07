@@ -10,7 +10,7 @@ class Direction {
   static const left = const Direction._(2, 'left');
   static const up = const Direction._(3, 'up');
 
-  static get values => [right, down, left, up];
+  static List<Direction> get values => [right, down, left, up];
 
   final int index;
   final String value;
@@ -23,7 +23,6 @@ class Direction {
 
 /// Superclass for all [Actor]s.
 abstract class Actor {
-
   /// A reference to the world.
   World world;
 
@@ -73,12 +72,12 @@ abstract class Actor {
       var coords = World.cellToPixel(x, y);
       _bitmap = new BitmapZ(image);
       _bitmap
-          ..x = coords.x
-          ..y = coords.y
-          ..layer = y
-          ..zIndex = zIndex
-          ..pivotX = (_bitmap.width / 2).floor()
-          ..pivotY = (_bitmap.height / 2).floor();
+        ..x = coords.x
+        ..y = coords.y
+        ..layer = y
+        ..zIndex = zIndex
+        ..pivotX = (_bitmap.width / 2).floor()
+        ..pivotY = (_bitmap.height / 2).floor();
     }
 
     // Add to the world.
@@ -94,12 +93,11 @@ abstract class Actor {
 
   /// Creates a move animation to the [targetPoint] with the specified
   /// [duration] in seconds.
-  Animatable _bitmapMoveAnimation(Point startPoint, Point targetPoint,
-                                  Direction direction, double duration) {
-    Point targetPixel = World.cellToPixel(targetPoint.x, targetPoint.y);
+  Animatable _bitmapMoveAnimation(Point<int> startPoint, Point<int> targetPoint,
+      Direction direction, double duration) {
+    Point<int> targetPixel = World.cellToPixel(targetPoint.x, targetPoint.y);
 
-    return new Tween(_bitmap, duration,
-        TransitionFunction.linear)
+    return new Tween(_bitmap, duration, Transition.linear)
       ..animate.x.to(targetPixel.x)
       ..animate.y.to(targetPixel.y)
       ..onStart = () {
@@ -125,8 +123,9 @@ abstract class Actor {
   /// to false.
   ///
   /// Note: Unless a subclass overrides this method, no turning will be done.
-  Animatable _bitmapTurnAnimation(Direction startDirection, Direction endDirection,
-                                  double duration, {clockwise: true}) {
+  Animatable _bitmapTurnAnimation(
+      Direction startDirection, Direction endDirection, double duration,
+      {bool clockwise: true}) {
     // Do nothing.
     return new DelayedCall(() {}, 0);
   }
@@ -138,6 +137,3 @@ abstract class Actor {
     }, 0);
   }
 }
-
-/// Helper method to convert the [degrees] to radian.
-num _degreesToRadian(num degrees) => degrees * math.PI / 180;

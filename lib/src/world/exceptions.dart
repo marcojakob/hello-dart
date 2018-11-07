@@ -5,7 +5,6 @@ class HelloDartException implements Exception {}
 
 /// Exception for errors created by the user who implemented the start()-method.
 class PlayerException implements HelloDartException {
-
   /// A message describing the player exception.
   final String message;
 
@@ -33,7 +32,6 @@ class OverflowException extends PlayerException {
 
 /// Exception used to stop the execution inside the start()-method.
 class StopException implements HelloDartException {}
-
 
 /// Exception for errors when parsing the scenario.
 class ScenarioException implements HelloDartException {
@@ -64,5 +62,3 @@ class FileNotFoundException implements HelloDartException {
     return "$message";
   }
 }
-
-

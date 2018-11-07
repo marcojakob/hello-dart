@@ -2,7 +2,6 @@ part of hello_dart;
 
 /// This class creates a world for the player and manages all other actors.
 class World extends Sprite {
-
   /// The asset directory.
   static const String imagesDir = 'packages/hello_dart/images';
 
@@ -74,7 +73,8 @@ class World extends Sprite {
   int get widthInPixels => widthInCells * cellWidth + 1;
 
   /// Returns the world's height in pixels (without margins).
-  int get heightInPixels => heightInCells * cellHeight + marginTop + marginBottom;
+  int get heightInPixels =>
+      heightInCells * cellHeight + marginTop + marginBottom;
 
   /// A Queue of player actions waiting to be executed.
   final Queue<PlayerAction> _actionQueue = new Queue();
@@ -110,12 +110,11 @@ class World extends Sprite {
 
   /// Initializes the world with the scenario.
   Future init(String scenarioFile) {
-
     // Load assets.
     return _loadAssets(scenarioFile).then((_) {
       // Init scenario.
-      scenario = Scenario.parse(resourceManager.getTextFile('scenario'),
-          scenarioFile);
+      scenario =
+          Scenario.parse(resourceManager.getTextFile('scenario'), scenarioFile);
       scenario.build(this);
 
       // Init body.
@@ -128,8 +127,7 @@ class World extends Sprite {
       _initStage();
 
       // Init the render loop and juggler.
-      renderLoop = new RenderLoop()
-          ..addStage(stage);
+      renderLoop = new RenderLoop()..addStage(stage);
       juggler = renderLoop.juggler;
 
       // The first execution should wait one cycle for the user to see it.
@@ -152,13 +150,11 @@ class World extends Sprite {
       // Execute the user's start()-method. This will fill the action queue.
       try {
         player.start();
-
       } on StopException {
         // Stop execution after all queued actions have been processed.
         _actionQueue.add((spd) {
           _enterFrameSub.cancel();
         });
-
       } on PlayerException catch (e) {
         // Stop execution after all queued actions have been processed, then
         // show the exception to the user.
@@ -209,13 +205,12 @@ class World extends Sprite {
         orElse: () => null);
   }
 
-
   /// Returns the field that is a number of [steps] away from [x], [y]
   /// in the specified [direction].
   Field getFieldInFront(int x, int y, Direction direction, [int steps = 1]) {
     _detectSensorCallOverflow();
 
-    Point p = World.getPointInFront(x, y, direction, steps);
+    Point<int> p = World.getPointInFront(x, y, direction, steps);
 
     return getFieldAt(p.x, p.y);
   }
@@ -224,16 +219,18 @@ class World extends Sprite {
   List<Actor> getActorsAt(int x, int y) {
     _detectSensorCallOverflow();
 
-    return actors.where((Actor actor) => actor.x == x && actor.y == y)
+    return actors
+        .where((Actor actor) => actor.x == x && actor.y == y)
         .toList(growable: false);
   }
 
   /// Returns a list of actors that are a number of [steps] away from [x], [y]
   /// in the specified [direction].
-  List<Actor> getActorsInFront(int x, int y, Direction direction, [int steps = 1]) {
+  List<Actor> getActorsInFront(int x, int y, Direction direction,
+      [int steps = 1]) {
     _detectSensorCallOverflow();
 
-    Point p = World.getPointInFront(x, y, direction, steps);
+    Point<int> p = World.getPointInFront(x, y, direction, steps);
 
     return getActorsAt(p.x, p.y);
   }
@@ -245,7 +242,8 @@ class World extends Sprite {
 
   /// Recalculates the correct child index of [child] and updates it.
   void updateChildIndexZOrder(DisplayObjectZ child) {
-    setChildIndex(child, math.min(_getChildIndexForZOrder(child), numChildren - 1));
+    setChildIndex(
+        child, math.min(_getChildIndexForZOrder(child), numChildren - 1));
   }
 
   /// Returns the correct child index where a child with [order] should be
@@ -262,20 +260,20 @@ class World extends Sprite {
   /// Loads all assets.
   /// Assets are finished loading when the returned [Future] completes.
   Future<ResourceManager> _loadAssets(String scenarioFile) {
-    Completer completer = new Completer();
+    Completer<ResourceManager> completer = new Completer();
 
     resourceManager = new ResourceManager();
 
     resourceManager
-        ..addBitmapData('field', '${imagesDir}/${field}.png')
-        ..addBitmapData('star', '${imagesDir}/star.png')
-        ..addBitmapData('box', '${imagesDir}/box.png')
-        ..addBitmapData('tree', '${imagesDir}/tree.png')
-        ..addTextureAtlas('character', '${imagesDir}/${character}.json',
-            TextureAtlasFormat.JSONARRAY)
-        ..addTextureAtlas('speech-bubble', '${imagesDir}/speech-bubble.json',
-            TextureAtlasFormat.JSONARRAY)
-        ..addTextFile('scenario', scenarioFile);
+      ..addBitmapData('field', '${imagesDir}/${field}.png')
+      ..addBitmapData('star', '${imagesDir}/star.png')
+      ..addBitmapData('box', '${imagesDir}/box.png')
+      ..addBitmapData('tree', '${imagesDir}/tree.png')
+      ..addTextureAtlas('character', '${imagesDir}/${character}.json',
+          TextureAtlasFormat.JSONARRAY)
+      ..addTextureAtlas('speech-bubble', '${imagesDir}/speech-bubble.json',
+          TextureAtlasFormat.JSONARRAY)
+      ..addTextFile('scenario', scenarioFile);
 
     resourceManager.load().then((manager) {
       completer.complete(manager);
@@ -301,8 +299,8 @@ class World extends Sprite {
       ..setProperty('flex-pack', 'center') // For IE10.
       ..alignItems = 'center'
       ..setProperty('flex-align', 'center') // For IE10.
-      ..background = 'linear-gradient(${backgroundColorTop}, ${backgroundColorBottom})';
-
+      ..background =
+          'linear-gradient(${backgroundColorTop}, ${backgroundColorBottom})';
   }
 
   /// Initializes the scenario title.
@@ -322,8 +320,8 @@ class World extends Sprite {
       ..whiteSpace = 'nowrap'
       ..color = 'white'
       ..textShadow = '-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black,'
-              '0px 4px 3px rgba(0,0,0,0.4),'
-              '0px 8px 13px rgba(0,0,0,0.1)';
+          '0px 4px 3px rgba(0,0,0,0.4),'
+          '0px 8px 13px rgba(0,0,0,0.1)';
     html.document.body.children.add(titleElement);
   }
 
@@ -336,16 +334,17 @@ class World extends Sprite {
       ..style.height = 'calc(100% - 120px)'
       ..style.maxHeight = '${heightInPixels}px'
       ..style.maxWidth = '${widthInPixels}px';
-      html.document.body.children.add(stageCanvas);
+    html.document.body.children.add(stageCanvas);
 
     // Init the Stage.
+    var options = new StageOptions()
+          ..transparent = true
+          ..backgroundColor =
+              0x00 // First two numbers after x are transparency.
+        ;
+
     stage = new Stage(stageCanvas,
-        width: widthInPixels,
-        height: heightInPixels,
-        frameRate: 30,
-        alpha: true,
-        webGL: true);
-    stage.backgroundColor = 0x00; // First two numbers after x are transparency.
+        width: widthInPixels, height: heightInPixels, options: options);
   }
 
   /// Draws the worlds background.
@@ -354,12 +353,12 @@ class World extends Sprite {
       var coords = cellToPixel(field.x, field.y);
       var tileBitmap = new BitmapZ(field.image);
       tileBitmap
-          ..x = coords.x
-          ..y = coords.y
-          ..layer = field.y
-          ..zIndex = field.zIndex
-          ..pivotX = (tileBitmap.width / 2).floor()
-          ..pivotY = (tileBitmap.height / 2).floor();
+        ..x = coords.x
+        ..y = coords.y
+        ..layer = field.y
+        ..zIndex = field.zIndex
+        ..pivotX = (tileBitmap.width / 2).floor()
+        ..pivotY = (tileBitmap.height / 2).floor();
       addChild(tileBitmap);
     });
   }
@@ -367,17 +366,19 @@ class World extends Sprite {
   /// Initializes the slider to change the speed.
   void _initSpeedSlider() {
     html.InputElement slider = new html.InputElement(type: 'range');
-    slider..id = 'speed-slider'
-        ..min = '0'
-        ..max = '100'
-        ..value = '${100 - _logValueToSlider(speed)}'
-        ..step = '1'
-        ..onChange.listen((_) {
-          int sliderValue = 100 - math.max(0, math.min(100, int.parse(slider.value)));
+    slider
+      ..id = 'speed-slider'
+      ..min = '0'
+      ..max = '100'
+      ..value = '${100 - _logValueToSlider(speed)}'
+      ..step = '1'
+      ..onChange.listen((_) {
+        int sliderValue =
+            100 - math.max(0, math.min(100, int.parse(slider.value)));
 
-          // Set the new speed.
-          speed = _logSliderToValue(sliderValue);
-        });
+        // Set the new speed.
+        speed = _logSliderToValue(sliderValue);
+      });
 
     slider.style
       ..padding = '5px 0'
@@ -400,7 +401,8 @@ class World extends Sprite {
     // Calculate adjustment factor.
     double scale = (maxValue - minValue) / (maxSlider - minSlider);
 
-    return math.exp(minValue + scale * (sliderValue - minSlider)).round() / 1000;
+    return math.exp(minValue + scale * (sliderValue - minSlider)).round() /
+        1000;
   }
 
   /// Converts the speed [value] (in seconds) to a slider value.
@@ -454,7 +456,7 @@ class World extends Sprite {
           if (_actionAnimatable != null) {
             juggler.add(_actionAnimatable);
           }
-        } on PlayerException catch(e) {
+        } on PlayerException catch (e) {
           // Show the exception to the user.
           html.window.alert(e.toString());
           _enterFrameSub.cancel();
@@ -466,15 +468,15 @@ class World extends Sprite {
   /// Translates a cell coordinate into pixel.
   ///
   /// The returned point is always the center of the cell.
-  static Point cellToPixel(num x, num y) {
-    return new Point(
-        x * cellWidth + (cellWidth / 2),
-        y * cellHeight + (cellHeight / 2) + marginTop);
+  static Point<int> cellToPixel(int x, int y) {
+    return new Point((x * cellWidth + (cellWidth / 2)).round(),
+        (y * cellHeight + (cellHeight / 2) + marginTop).round());
   }
 
   /// Returns the point that is a number of [steps] away from [x], [y] in
   /// the specified [direction].
-  static Point getPointInFront(int x, int y, Direction direction, [int steps = 1]) {
+  static Point<int> getPointInFront(int x, int y, Direction direction,
+      [int steps = 1]) {
     switch (direction) {
       case Direction.right:
         return new Point(x + steps, y);
@@ -499,7 +501,6 @@ class World extends Sprite {
 /// be animated.
 typedef Animatable PlayerAction(double duration);
 
-
 /// Extends [Bitmap] to have a z-order.
 class BitmapZ extends Bitmap implements DisplayObjectZ {
   @override
@@ -519,8 +520,9 @@ class FlipBookZ extends FlipBook implements DisplayObjectZ {
   @override
   int zIndex = 0;
 
-  FlipBookZ(List<BitmapData> bitmapDatas, [int frameRate = 30, bool loop = true]) :
-    super(bitmapDatas, frameRate, loop);
+  FlipBookZ(List<BitmapData> bitmapDatas,
+      [int frameRate = 30, bool loop = true])
+      : super(bitmapDatas, frameRate, loop);
 
   /// TODO: This only a hack because of bug
   /// https://github.com/bp74/StageXL/issues/178
@@ -558,24 +560,21 @@ abstract class DisplayObjectZ extends DisplayObject {
   int zIndex = 0;
 }
 
-
 /// Function to compare two [DisplayObject]s via their layer and zIndex if
 /// they implement [DisplayObjectZ].
 int _displayObjectCompare(DisplayObject a, DisplayObject b) {
   if (a is DisplayObjectZ) {
     if (b is DisplayObjectZ) {
-      if (a.layer !=b.layer) {
+      if (a.layer != b.layer) {
         return a.layer.compareTo(b.layer);
       } else {
         // Same layer. Must compare z-index.
         return a.zIndex.compareTo(b.zIndex);
       }
-
     } else {
       // b is not a DisplayObjectZ.
       return -1;
     }
-
   } else {
     // a is not a DisplayObjectZ.
     return 1;

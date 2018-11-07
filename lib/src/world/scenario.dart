@@ -22,7 +22,8 @@ class Scenario {
   static const String player = '@';
   static const String tree = '%';
   static const String star = '.';
-  static const String box = r'$'; // r means raw String (treats dollar sign as a normal String)
+  static const String box =
+      r'$'; // r means raw String (treats dollar sign as a normal String)
   static const String boxStar = '*';
   static const String playerStar = '+';
   static const String empty = ' ';
@@ -85,9 +86,9 @@ class Scenario {
             // Only add first occurrence of the player.
             if (!playerAdded) {
               world.player
-                  ..x = x
-                  ..y = y
-                  ..direction = Direction.right;
+                ..x = x
+                ..y = y
+                ..direction = Direction.right;
               world.actors.add(world.player);
               playerAdded = true;
             }
@@ -109,9 +110,9 @@ class Scenario {
             // Only add first occurrence of the player.
             if (!playerAdded) {
               world.player
-                  ..x = x
-                  ..y = y
-                  ..direction = Direction.right;
+                ..x = x
+                ..y = y
+                ..direction = Direction.right;
               world.actors.add(world.player);
               playerAdded = true;
             }
@@ -146,10 +147,10 @@ class Scenario {
       int intersections = 0;
 
       bool horizontally = false;
-      bool horizontallyFromUp; // True if we came from up to the horizontal line.
+      bool
+          horizontallyFromUp; // True if we came from up to the horizontal line.
 
       for (int x = 0; x < outline[y].length; x++) {
-
         if (outline[y][x] == Scenario.borderOrHole) {
           // We must be careful when moving on horizontal lines that we don't
           // count them as intersections when we're only moving along an outer
@@ -161,7 +162,7 @@ class Scenario {
           //   there was an intersection. Same for down and down.
 
           // Peek ahead to see if we're going horizontally.
-          if (x + 1 < _width && outline[y][x + 1] == Scenario.borderOrHole){
+          if (x + 1 < _width && outline[y][x + 1] == Scenario.borderOrHole) {
             // We're going horizontally.
             if (!horizontally) {
               // We're at the start of going horizontally, save the direction
@@ -173,7 +174,6 @@ class Scenario {
                 horizontallyFromUp = true;
               }
             }
-
           } else {
             if (horizontally) {
               // We're at the end of a horizontal line.
@@ -192,13 +192,11 @@ class Scenario {
 
               horizontally = false;
               horizontallyFromUp = null;
-
             } else {
               // Not going horizontally.
               intersections++;
             }
           }
-
         } else if (intersections % 2 == 1) {
           // Uneven intersections means we are inside the polygon.
 
@@ -216,14 +214,14 @@ class Scenario {
     if (positions.isEmpty) return new List();
 
     // Fill result list with empty Strings.
-    List<List<String>> outlineLines = new List.generate(_height, (_) =>
-      new List.filled(_width, Scenario.empty));
+    List<List<String>> outlineLines = new List.generate(
+        _height, (_) => new List.filled(_width, Scenario.empty));
 
     // 1. Find top-left point.
-    Point startPoint = _topLeft();
+    Point<int> startPoint = _topLeft();
 
     // 2. Find all the points until we are at the start point again.
-    Point currentPoint = startPoint;
+    Point<int> currentPoint = startPoint;
     String lastDirection = 'U';
 
     do {
@@ -231,7 +229,7 @@ class Scenario {
       outlineLines[currentPoint.y][currentPoint.x] = Scenario.borderOrHole;
 
       // Find the next point.
-      var pair;
+      _Pair<Point<int>, String> pair;
       switch (lastDirection) {
         case 'U': // up
           pair = _findOutlineLeft(currentPoint);
@@ -254,13 +252,13 @@ class Scenario {
 
       currentPoint = pair.first;
       lastDirection = pair.last;
-    } while (!currentPoint.equals(startPoint));
+    } while (currentPoint != startPoint);
 
     return outlineLines.map((line) => line.join()).toList(growable: false);
   }
 
   /// Finds the top left border field in [positions].
-  Point _topLeft() {
+  Point<int> _topLeft() {
     for (int y = 0; y < positions.length; y++) {
       for (int x = 0; x < positions[y].length; x++) {
         if (positions[y][x] == Scenario.borderOrHole) {
@@ -280,7 +278,7 @@ class Scenario {
   ///
   /// The [directionCountdown] is used to count how many directions were tested.
   /// If it reaches 0 and no point has been found, null is returned.
-  _Pair<Point, String> _findOutlineUp(Point p, {int directionCountdown: 3}) {
+  _Pair<Point<int>, String> _findOutlineUp(Point<int> p, {int directionCountdown: 3}) {
     if (directionCountdown > 0) {
       if (p.y > 0 && positions[p.y - 1][p.x] == Scenario.borderOrHole) {
         return new _Pair(new Point(p.x, p.y - 1), 'U');
@@ -298,9 +296,10 @@ class Scenario {
   ///
   /// The [directionCountdown] is used to count how many directions were tested.
   /// If it reaches 0 and no point has been found, null is returned.
-  _Pair<Point, String> _findOutlineRight(Point p, {int directionCountdown: 3}) {
+  _Pair<Point<int>, String> _findOutlineRight(Point<int> p, {int directionCountdown: 3}) {
     if (directionCountdown > 0) {
-      if (p.x + 1 < _width && positions[p.y][p.x + 1] == Scenario.borderOrHole) {
+      if (p.x + 1 < _width &&
+          positions[p.y][p.x + 1] == Scenario.borderOrHole) {
         return new _Pair(new Point(p.x + 1, p.y), 'R');
       } else {
         return _findOutlineDown(p, directionCountdown: directionCountdown - 1);
@@ -316,9 +315,10 @@ class Scenario {
   ///
   /// The [directionCountdown] is used to count how many directions were tested.
   /// If it reaches 0 and no point has been found, null is returned.
-  _Pair<Point, String> _findOutlineDown(Point p, {int directionCountdown: 3}) {
+  _Pair<Point<int>, String> _findOutlineDown(Point<int> p, {int directionCountdown: 3}) {
     if (directionCountdown > 0) {
-      if (p.y + 1 < _height && positions[p.y + 1][p.x] == Scenario.borderOrHole) {
+      if (p.y + 1 < _height &&
+          positions[p.y + 1][p.x] == Scenario.borderOrHole) {
         return new _Pair(new Point(p.x, p.y + 1), 'D');
       } else {
         return _findOutlineLeft(p, directionCountdown: directionCountdown - 1);
@@ -334,7 +334,7 @@ class Scenario {
   ///
   /// The [directionCountdown] is used to count how many directions were tested.
   /// If it reaches 0 and no point has been found, null is returned.
-  _Pair<Point, String> _findOutlineLeft(Point p, {int directionCountdown: 3}) {
+  _Pair<Point<int>, String> _findOutlineLeft(Point<int> p, {int directionCountdown: 3}) {
     if (directionCountdown > 0) {
       if (p.x > 0 && positions[p.y][p.x - 1] == Scenario.borderOrHole) {
         return new _Pair(new Point(p.x - 1, p.y), 'L');
@@ -353,18 +353,12 @@ class Scenario {
   /// If the scenario couldn't be parsed, a [ScenarioException] is thrown.
   static Scenario parse(String scenarioString, String file) {
     var scanner = new StringScanner(scenarioString);
-
-    bool titleStart = scanner.scan(new RegExp(r'[-]+.*'));
-
-
-    var title;
-    if (scanner.scan(new RegExp(r'\r?\n(.*)'))) {
-      title = scanner.lastMatch[1];
+    String title;
+    if (scanner.scan(new RegExp(r'(.*)\r?\n(.*)'))) {
+      title = scanner.lastMatch[2];
     } else {
       throw new ScenarioException(messages.scenarioInvalid());
     }
-
-    bool titleEnd = scanner.scan(new RegExp(r'\r?\n[-]+.*'));
 
     String positions;
     if (scanner.scan(new RegExp(r'\r?\n([\s\S]*)'))) {
@@ -375,15 +369,15 @@ class Scenario {
 
     List<String> positionLines = positions.split(new RegExp(r'\r?\n'));
 
-    int width = positionLines.fold(0, (val, line) => math.max(val, line.length));
-    int height = positionLines.length;
+    int width =
+        positionLines.fold(0, (val, line) => math.max(val, line.length));
 
     // Make all lines the same length.
-    positionLines = positionLines.map((line) =>
-        line.padRight(width, Scenario.empty)).toList(growable: false);
+    positionLines = positionLines
+        .map((line) => line.padRight(width, Scenario.empty))
+        .toList(growable: false);
 
-    return new Scenario(title: title,
-        positions: positionLines);
+    return new Scenario(title: title, positions: positionLines);
   }
 }
 

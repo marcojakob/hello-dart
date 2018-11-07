@@ -2,7 +2,6 @@ import 'package:hello_dart/hello_dart.dart';
 
 /// Your player.
 class MyPlayer extends Player {
-
   /// Your program.
   start() {
     move();
@@ -10,7 +9,6 @@ class MyPlayer extends Player {
     move();
   }
 }
-
 
 main() {
   createWorld('scenario.txt', new MyPlayer());
