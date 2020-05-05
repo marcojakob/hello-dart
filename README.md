@@ -63,7 +63,7 @@ class MyPlayer extends Player {
 
 
 main() {
-  createWorld('scenario.txt', new MyPlayer());
+  createWorld('scenario.txt', MyPlayer());
 }
 ```
 
@@ -168,10 +168,10 @@ main() {
   backgroundColorTop = '#fff';
 
   // Set to German error messages.
-  messages = new MessagesDe();
+  messages = MessagesDe();
 
   // Create the world with an initial speed of 0.3 seconds.
-  createWorld('scenario.txt', new MyPlayer(), 0.3);
+  createWorld('scenario.txt', MyPlayer(), 0.3);
 }
 ```
 

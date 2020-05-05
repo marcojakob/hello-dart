@@ -35,22 +35,22 @@ abstract class Player extends Actor {
     if (box != null) {
       // Check if the box can be pushed to the next field.
       if (box.canMove(direction)) {
-        Point<int> boxStartPointCopy = new Point(box.x, box.y);
-        Point<int> playerStartPointCopy = new Point(x, y);
+        Point<int> boxStartPointCopy = Point(box.x, box.y);
+        Point<int> playerStartPointCopy = Point(x, y);
 
         // Push the box and move the player.
         box._move(direction);
         _move(direction);
 
-        Point<int> boxTargetPointCopy = new Point(box.x, box.y);
-        Point<int> playerTargetPointCopy = new Point(x, y);
+        Point<int> boxTargetPointCopy = Point(box.x, box.y);
+        Point<int> playerTargetPointCopy = Point(x, y);
 
         // Copy the current box image name and the player's direction.
         var boxImage = box.image;
         Direction directionCopy = direction;
 
         world.queueAction((duration) {
-          AnimationGroup animGroup = new AnimationGroup();
+          AnimationGroup animGroup = AnimationGroup();
           animGroup.add(box._bitmapMoveAnimation(
               boxStartPointCopy, boxTargetPointCopy, directionCopy, duration));
           animGroup.add(box._bitmapUpdateImage(boxImage, duration));
@@ -65,12 +65,12 @@ abstract class Player extends Actor {
         stop();
       }
     } else {
-      Point<int> startPointCopy = new Point(x, y);
+      Point<int> startPointCopy = Point(x, y);
 
       // Nothing in the way, the player can move.
       _move(direction);
 
-      Point<int> targetPointCopy = new Point(x, y);
+      Point<int> targetPointCopy = Point(x, y);
       Direction directionCopy = direction;
 
       world.queueAction((duration) {
@@ -164,7 +164,7 @@ abstract class Player extends Actor {
   /// The player adds a star.
   void putStar() {
     if (!onStar()) {
-      Star star = new Star(world, x, y);
+      Star star = Star(world, x, y);
       world.actors.add(star);
 
       world.queueAction((duration) {
@@ -217,7 +217,7 @@ abstract class Player extends Actor {
       var textField = _createTextField(text, bubbleLeft);
       var bubble = _createSpeechBubble(textField.width - 4, bubbleLeft);
 
-      SpriteZ speechBubble = new SpriteZ()
+      SpriteZ speechBubble = SpriteZ()
         ..layer = world.heightInCells // Position on top of everything.
         ..y = playerPixelCopy.y - 120
         ..addChild(bubble)
@@ -233,7 +233,7 @@ abstract class Player extends Actor {
 
       if (seconds > -1) {
         // Remove after the specified time.
-        return new DelayedCall(() {
+        return DelayedCall(() {
           speechBubble.removeFromParent();
         }, seconds);
       }
@@ -245,7 +245,7 @@ abstract class Player extends Actor {
   /// Creates a text field.
   TextField _createTextField(String text, bool bubbleLeft) {
     // Only allow 4 lines of text.
-    var lines = text.split(new RegExp(r'\r?\n'));
+    var lines = text.split(RegExp(r'\r?\n'));
     if (lines.length > 4) {
       lines.removeRange(4, lines.length);
     }
@@ -263,8 +263,8 @@ abstract class Player extends Actor {
         marginTop = 9;
     }
 
-    var textField = new TextField()
-      ..defaultTextFormat = new TextFormat(
+    var textField = TextField()
+      ..defaultTextFormat = TextFormat(
           'Helvetica Neue, Helvetica, Arial, sans-serif', 15, Color.Black,
           bold: true)
       ..text = text
@@ -279,21 +279,21 @@ abstract class Player extends Actor {
   Bitmap _createSpeechBubble(num width, bool bubbleLeft) {
     var atlas = world.resourceManager.getTextureAtlas('speech-bubble');
 
-    var bubbleBitmap = new BitmapData(34 + width, 106, 0x00);
+    var bubbleBitmap = BitmapData(34 + width, 106, 0x00);
 
-    bubbleBitmap.drawPixels(atlas.getBitmapData('left'),
-        new Rectangle(0, 0, 20, 106), new Point(0, 0));
+    bubbleBitmap.drawPixels(
+        atlas.getBitmapData('left'), Rectangle(0, 0, 20, 106), Point(0, 0));
 
     var centerData = atlas.getBitmapData('center');
     for (int i = 0; i < width; i++) {
       bubbleBitmap.drawPixels(
-          centerData, new Rectangle(0, 0, 1, 106), new Point(i + 20, 0));
+          centerData, Rectangle(0, 0, 1, 106), Point(i + 20, 0));
     }
 
     bubbleBitmap.drawPixels(atlas.getBitmapData('right'),
-        new Rectangle(0, 0, 14, 106), new Point(20 + width, 0));
+        Rectangle(0, 0, 14, 106), Point(20 + width, 0));
 
-    var bubble = new Bitmap(bubbleBitmap);
+    var bubble = Bitmap(bubbleBitmap);
 
     if (bubbleLeft) {
       // Mirror the bubble to the left side.
@@ -318,7 +318,7 @@ abstract class Player extends Actor {
   void stop() {
     // We throw an exception here because it is the only way to immediately
     // leave an executing method.
-    throw new StopException();
+    throw StopException();
   }
 
   /// Returns the next direction when turning clockwise.
@@ -355,7 +355,7 @@ abstract class Player extends Actor {
     }
 
     // Create walking flip book.
-    var flipBook = new FlipBookZ(walkCycle, frameRate, false)
+    var flipBook = FlipBookZ(walkCycle, frameRate, false)
       ..x = _bitmap.x
       ..y = _bitmap.y
       ..layer = layerDuringMove
@@ -366,7 +366,7 @@ abstract class Player extends Actor {
       ..play();
 
     // Create the move tween.
-    Tween tween = new Tween(flipBook, duration, Transition.linear)
+    Tween tween = Tween(flipBook, duration, Transition.linear)
       ..animate.x.to(targetPixel.x)
       ..animate.y.to(targetPixel.y)
       ..onStart = () {
@@ -383,7 +383,7 @@ abstract class Player extends Actor {
         _bitmapAddToWorld();
       };
 
-    AnimationGroup animGroup = new AnimationGroup();
+    AnimationGroup animGroup = AnimationGroup();
     animGroup.add(tween);
     animGroup.add(flipBook);
 
@@ -411,7 +411,7 @@ abstract class Player extends Actor {
     int frameRate = (turnCycle.length / duration).ceil();
 
     // Create walking flip book.
-    var flipBook = new FlipBookZ(turnCycle, frameRate, false)
+    var flipBook = FlipBookZ(turnCycle, frameRate, false)
       ..x = _bitmap.x
       ..y = _bitmap.y
       ..layer = _bitmap.layer
@@ -421,7 +421,7 @@ abstract class Player extends Actor {
       ..mouseEnabled = false
       ..play();
 
-    Tween tween = new Tween(flipBook, duration, Transition.linear)
+    Tween tween = Tween(flipBook, duration, Transition.linear)
       ..onStart = () {
         _bitmapRemoveFromWorld();
         world.addChildAtZOrder(flipBook);
@@ -434,7 +434,7 @@ abstract class Player extends Actor {
         _bitmapAddToWorld();
       };
 
-    AnimationGroup animGroup = new AnimationGroup();
+    AnimationGroup animGroup = AnimationGroup();
     animGroup.add(flipBook);
     animGroup.add(tween);
     return animGroup;

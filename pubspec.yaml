@@ -1,6 +1,6 @@
 name: hello_dart
-version: 0.3.0
-description: A visual and playful introduction to programming with Dart.
+version: 0.3.1
+description: A visual and playful introduction to programming with the Dart language.
 homepage: https://code.makery.ch/library/hello-dart/
 documentation: https://github.com/marcojakob/hello-dart
 environment:

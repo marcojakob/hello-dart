@@ -5,10 +5,10 @@ part of hello_dart;
 /// Note: This class mimics an enum in Dart. In future Dart versions we will
 /// be able to use real enums.
 class Direction {
-  static const right = const Direction._(0, 'right');
-  static const down = const Direction._(1, 'down');
-  static const left = const Direction._(2, 'left');
-  static const up = const Direction._(3, 'up');
+  static const right = Direction._(0, 'right');
+  static const down = Direction._(1, 'down');
+  static const left = Direction._(2, 'left');
+  static const up = Direction._(3, 'up');
 
   static List<Direction> get values => [right, down, left, up];
 
@@ -70,7 +70,7 @@ abstract class Actor {
     if (_bitmap == null) {
       // Create the bitmap.
       var coords = World.cellToPixel(x, y);
-      _bitmap = new BitmapZ(image);
+      _bitmap = BitmapZ(image);
       _bitmap
         ..x = coords.x
         ..y = coords.y
@@ -97,7 +97,7 @@ abstract class Actor {
       Direction direction, double duration) {
     Point<int> targetPixel = World.cellToPixel(targetPoint.x, targetPoint.y);
 
-    return new Tween(_bitmap, duration, Transition.linear)
+    return Tween(_bitmap, duration, Transition.linear)
       ..animate.x.to(targetPixel.x)
       ..animate.y.to(targetPixel.y)
       ..onStart = () {
@@ -123,18 +123,18 @@ abstract class Actor {
   /// to false.
   ///
   /// Note: Unless a subclass overrides this method, no turning will be done.
-  /// 
+  ///
   /// ignore: unused_element
   Animatable _bitmapTurnAnimation(
       Direction startDirection, Direction endDirection, double duration,
       {bool clockwise: true}) {
     // Do nothing.
-    return new DelayedCall(() {}, 0);
+    return DelayedCall(() {}, 0);
   }
 
   /// Creates a [DelayedCall] to update the image to [newImage].
   Animatable _bitmapUpdateImage(BitmapData newImage, double duration) {
-    return new DelayedCall(() {
+    return DelayedCall(() {
       _bitmap.bitmapData = newImage;
     }, 0);
   }

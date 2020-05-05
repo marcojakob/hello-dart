@@ -50,8 +50,8 @@ String backgroundColorBottom = '#ffffff';
 ///
 /// For other languages, set this variable to another [Messages] object.
 /// Example for German:
-///     messages = new MessagesDe();
-Messages messages = new Messages();
+///     messages = MessagesDe();
+Messages messages = Messages();
 
 /// Initializes the world with the specified [scenarioFile] and shows it.
 ///
@@ -60,7 +60,7 @@ Messages messages = new Messages();
 /// The [speed] is the duration between the execution of actions (in seconds).
 void createWorld(String scenarioFile, Player player, [num speed = 1]) {
 
-  World world = new World(player, speed);
+  World world = World(player, speed);
 
   // Initialize the world.
   world.init(scenarioFile).catchError((e) {

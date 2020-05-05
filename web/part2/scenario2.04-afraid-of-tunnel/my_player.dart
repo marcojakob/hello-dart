@@ -10,5 +10,5 @@ class MyPlayer extends Player {
 
 
 main() {
-  createWorld('scenario.txt', new MyPlayer());
+  createWorld('scenario.txt', MyPlayer());
 }

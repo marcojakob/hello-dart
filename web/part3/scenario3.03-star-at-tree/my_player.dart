@@ -16,5 +16,5 @@ if (treeLeft() || treeRight()) {
 
 
 main() {
-  createWorld('scenario.txt', new MyPlayer());
+  createWorld('scenario.txt', MyPlayer());
 }

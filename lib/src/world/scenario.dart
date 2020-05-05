@@ -48,10 +48,10 @@ class Scenario {
 
   /// Creates a [Scenario] with specified [title] and [positions] of actors
   /// and background tiles.
-  Scenario({this.title: 'untitled', this.positions: const ['@']}) {
+  Scenario({this.title = 'untitled', this.positions = const ['@']}) {
     // Validate scenario positions.
     if (positions.isEmpty || positions[0].isEmpty) {
-      throw new ScenarioException(messages.scenarioInvalid());
+      throw ScenarioException(messages.scenarioInvalid());
     }
   }
 
@@ -94,17 +94,17 @@ class Scenario {
             }
             break;
           case Scenario.tree:
-            world.actors.add(new Tree(world, x, y));
+            world.actors.add(Tree(world, x, y));
             break;
           case Scenario.star:
-            world.actors.add(new Star(world, x, y));
+            world.actors.add(Star(world, x, y));
             break;
           case Scenario.box:
-            world.actors.add(new Box(world, x, y));
+            world.actors.add(Box(world, x, y));
             break;
           case Scenario.boxStar:
-            world.actors.add(new Box(world, x, y));
-            world.actors.add(new Star(world, x, y));
+            world.actors.add(Box(world, x, y));
+            world.actors.add(Star(world, x, y));
             break;
           case Scenario.playerStar:
             // Only add first occurrence of the player.
@@ -116,7 +116,7 @@ class Scenario {
               world.actors.add(world.player);
               playerAdded = true;
             }
-            world.actors.add(new Star(world, x, y));
+            world.actors.add(Star(world, x, y));
             break;
         }
       }
@@ -202,7 +202,7 @@ class Scenario {
 
           // Add the tile unless there is a hole inside the polygon.
           if (positions[y][x] != Scenario.borderOrHole) {
-            world.fields.add(new Field(world, x, y));
+            world.fields.add(Field(world, x, y));
           }
         }
       }
@@ -211,11 +211,11 @@ class Scenario {
 
   /// Returns a list with just the outline of all non-empty characters.
   List<String> _findOutline() {
-    if (positions.isEmpty) return new List();
+    if (positions.isEmpty) return List();
 
     // Fill result list with empty Strings.
-    List<List<String>> outlineLines = new List.generate(
-        _height, (_) => new List.filled(_width, Scenario.empty));
+    List<List<String>> outlineLines =
+        List.generate(_height, (_) => List.filled(_width, Scenario.empty));
 
     // 1. Find top-left point.
     Point<int> startPoint = _topLeft();
@@ -247,7 +247,7 @@ class Scenario {
 
       if (pair == null) {
         // No valid outline found.
-        throw new ScenarioException(messages.scenarioInvalid());
+        throw ScenarioException(messages.scenarioInvalid());
       }
 
       currentPoint = pair.first;
@@ -262,13 +262,13 @@ class Scenario {
     for (int y = 0; y < positions.length; y++) {
       for (int x = 0; x < positions[y].length; x++) {
         if (positions[y][x] == Scenario.borderOrHole) {
-          return new Point(x, y);
+          return Point(x, y);
         }
       }
     }
 
     // Nothing found.
-    throw new ScenarioException(messages.scenarioInvalid());
+    throw ScenarioException(messages.scenarioInvalid());
   }
 
   /// Rotates through all four directions, starting with UP to check if there
@@ -278,10 +278,11 @@ class Scenario {
   ///
   /// The [directionCountdown] is used to count how many directions were tested.
   /// If it reaches 0 and no point has been found, null is returned.
-  _Pair<Point<int>, String> _findOutlineUp(Point<int> p, {int directionCountdown: 3}) {
+  _Pair<Point<int>, String> _findOutlineUp(Point<int> p,
+      {int directionCountdown: 3}) {
     if (directionCountdown > 0) {
       if (p.y > 0 && positions[p.y - 1][p.x] == Scenario.borderOrHole) {
-        return new _Pair(new Point(p.x, p.y - 1), 'U');
+        return _Pair(Point(p.x, p.y - 1), 'U');
       } else {
         return _findOutlineRight(p, directionCountdown: directionCountdown - 1);
       }
@@ -296,11 +297,12 @@ class Scenario {
   ///
   /// The [directionCountdown] is used to count how many directions were tested.
   /// If it reaches 0 and no point has been found, null is returned.
-  _Pair<Point<int>, String> _findOutlineRight(Point<int> p, {int directionCountdown: 3}) {
+  _Pair<Point<int>, String> _findOutlineRight(Point<int> p,
+      {int directionCountdown: 3}) {
     if (directionCountdown > 0) {
       if (p.x + 1 < _width &&
           positions[p.y][p.x + 1] == Scenario.borderOrHole) {
-        return new _Pair(new Point(p.x + 1, p.y), 'R');
+        return _Pair(Point(p.x + 1, p.y), 'R');
       } else {
         return _findOutlineDown(p, directionCountdown: directionCountdown - 1);
       }
@@ -315,11 +317,12 @@ class Scenario {
   ///
   /// The [directionCountdown] is used to count how many directions were tested.
   /// If it reaches 0 and no point has been found, null is returned.
-  _Pair<Point<int>, String> _findOutlineDown(Point<int> p, {int directionCountdown: 3}) {
+  _Pair<Point<int>, String> _findOutlineDown(Point<int> p,
+      {int directionCountdown: 3}) {
     if (directionCountdown > 0) {
       if (p.y + 1 < _height &&
           positions[p.y + 1][p.x] == Scenario.borderOrHole) {
-        return new _Pair(new Point(p.x, p.y + 1), 'D');
+        return _Pair(Point(p.x, p.y + 1), 'D');
       } else {
         return _findOutlineLeft(p, directionCountdown: directionCountdown - 1);
       }
@@ -334,10 +337,11 @@ class Scenario {
   ///
   /// The [directionCountdown] is used to count how many directions were tested.
   /// If it reaches 0 and no point has been found, null is returned.
-  _Pair<Point<int>, String> _findOutlineLeft(Point<int> p, {int directionCountdown: 3}) {
+  _Pair<Point<int>, String> _findOutlineLeft(Point<int> p,
+      {int directionCountdown: 3}) {
     if (directionCountdown > 0) {
       if (p.x > 0 && positions[p.y][p.x - 1] == Scenario.borderOrHole) {
-        return new _Pair(new Point(p.x - 1, p.y), 'L');
+        return _Pair(Point(p.x - 1, p.y), 'L');
       } else {
         return _findOutlineUp(p, directionCountdown: directionCountdown - 1);
       }
@@ -352,22 +356,22 @@ class Scenario {
   ///
   /// If the scenario couldn't be parsed, a [ScenarioException] is thrown.
   static Scenario parse(String scenarioString, String file) {
-    var scanner = new StringScanner(scenarioString);
+    var scanner = StringScanner(scenarioString);
     String title;
-    if (scanner.scan(new RegExp(r'(.*)\r?\n(.*)'))) {
+    if (scanner.scan(RegExp(r'(.*)\r?\n(.*)'))) {
       title = scanner.lastMatch[2];
     } else {
-      throw new ScenarioException(messages.scenarioInvalid());
+      throw ScenarioException(messages.scenarioInvalid());
     }
 
     String positions;
-    if (scanner.scan(new RegExp(r'\r?\n([\s\S]*)'))) {
+    if (scanner.scan(RegExp(r'\r?\n([\s\S]*)'))) {
       positions = scanner.lastMatch[1].trimRight();
     } else {
-      throw new ScenarioException(messages.scenarioInvalid());
+      throw ScenarioException(messages.scenarioInvalid());
     }
 
-    List<String> positionLines = positions.split(new RegExp(r'\r?\n'));
+    List<String> positionLines = positions.split(RegExp(r'\r?\n'));
 
     int width =
         positionLines.fold(0, (val, line) => math.max(val, line.length));
@@ -377,7 +381,7 @@ class Scenario {
         .map((line) => line.padRight(width, Scenario.empty))
         .toList(growable: false);
 
-    return new Scenario(title: title, positions: positionLines);
+    return Scenario(title: title, positions: positionLines);
   }
 }
 

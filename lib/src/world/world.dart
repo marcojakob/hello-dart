@@ -77,7 +77,7 @@ class World extends Sprite {
       heightInCells * cellHeight + marginTop + marginBottom;
 
   /// A Queue of player actions waiting to be executed.
-  final Queue<PlayerAction> _actionQueue = new Queue();
+  final Queue<PlayerAction> _actionQueue = Queue();
 
   /// A counter to detect infinite loops in sensor methods.
   ///
@@ -127,7 +127,7 @@ class World extends Sprite {
       _initStage();
 
       // Init the render loop and juggler.
-      renderLoop = new RenderLoop()..addStage(stage);
+      renderLoop = RenderLoop()..addStage(stage);
       juggler = renderLoop.juggler;
 
       // The first execution should wait one cycle for the user to see it.
@@ -179,7 +179,7 @@ class World extends Sprite {
     if (_actionQueue.length > maxActionCalls) {
       // The maximum number of action method calls during one act()-call has
       // been reached.
-      throw new OverflowException(messages.actionOverflowException());
+      throw OverflowException(messages.actionOverflowException());
     }
   }
 
@@ -195,7 +195,7 @@ class World extends Sprite {
     if (_sensorCallCounter > maxSensorCalls) {
       // The maximum number of sensor method calls during one act()-call has
       // been reached.
-      throw new OverflowException(messages.actionOverflowException());
+      throw OverflowException(messages.actionOverflowException());
     }
   }
 
@@ -262,9 +262,9 @@ class World extends Sprite {
   /// Loads all assets.
   /// Assets are finished loading when the returned [Future] completes.
   Future<ResourceManager> _loadAssets(String scenarioFile) {
-    Completer<ResourceManager> completer = new Completer();
+    Completer<ResourceManager> completer = Completer();
 
-    resourceManager = new ResourceManager();
+    resourceManager = ResourceManager();
 
     resourceManager
       ..addBitmapData('field', '${imagesDir}/${field}.png')
@@ -281,7 +281,7 @@ class World extends Sprite {
       completer.complete(manager);
     }).catchError((error) {
       completer.completeError(
-          new FileNotFoundException(messages.fileNotFoundException()));
+          FileNotFoundException(messages.fileNotFoundException()));
     });
 
     return completer.future;
@@ -308,7 +308,7 @@ class World extends Sprite {
   /// Initializes the scenario title.
   void _initTitle() {
     // Create the title element and add it to the html body element.
-    html.Element titleElement = new html.Element.tag('h2')
+    html.Element titleElement = html.Element.tag('h2')
       ..id = 'title'
       ..text = scenario.title;
 
@@ -330,7 +330,7 @@ class World extends Sprite {
   /// Initialize the [stage], [renderLoop], [juggler], and [resourceManager].
   void _initStage() {
     // Create the canvas element and add it to the html body element.
-    html.CanvasElement stageCanvas = new html.CanvasElement()
+    html.CanvasElement stageCanvas = html.CanvasElement()
       ..id = 'stage'
       ..style.width = '100%'
       ..style.height = 'calc(100% - 120px)'
@@ -339,13 +339,13 @@ class World extends Sprite {
     html.document.body.children.add(stageCanvas);
 
     // Init the Stage.
-    var options = new StageOptions()
+    var options = StageOptions()
           ..transparent = true
           ..backgroundColor =
               0x00 // First two numbers after x are transparency.
         ;
 
-    stage = new Stage(stageCanvas,
+    stage = Stage(stageCanvas,
         width: widthInPixels, height: heightInPixels, options: options);
   }
 
@@ -353,7 +353,7 @@ class World extends Sprite {
   void _drawFields() {
     fields.forEach((field) {
       var coords = cellToPixel(field.x, field.y);
-      var tileBitmap = new BitmapZ(field.image);
+      var tileBitmap = BitmapZ(field.image);
       tileBitmap
         ..x = coords.x
         ..y = coords.y
@@ -367,7 +367,7 @@ class World extends Sprite {
 
   /// Initializes the slider to change the speed.
   void _initSpeedSlider() {
-    html.InputElement slider = new html.InputElement(type: 'range');
+    html.InputElement slider = html.InputElement(type: 'range');
     slider
       ..id = 'speed-slider'
       ..min = '0'
@@ -471,7 +471,7 @@ class World extends Sprite {
   ///
   /// The returned point is always the center of the cell.
   static Point<int> cellToPixel(int x, int y) {
-    return new Point((x * cellWidth + (cellWidth / 2)).round(),
+    return Point((x * cellWidth + (cellWidth / 2)).round(),
         (y * cellHeight + (cellHeight / 2) + marginTop).round());
   }
 
@@ -481,17 +481,17 @@ class World extends Sprite {
       [int steps = 1]) {
     switch (direction) {
       case Direction.right:
-        return new Point(x + steps, y);
+        return Point(x + steps, y);
       case Direction.down:
-        return new Point(x, y + steps);
+        return Point(x, y + steps);
       case Direction.left:
-        return new Point(x - steps, y);
+        return Point(x - steps, y);
       case Direction.up:
-        return new Point(x, y - steps);
+        return Point(x, y - steps);
     }
 
     // We only get here if direction was null.
-    throw new ArgumentError.notNull('direction');
+    throw ArgumentError.notNull('direction');
   }
 }
 
