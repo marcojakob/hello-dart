@@ -123,6 +123,8 @@ abstract class Actor {
   /// to false.
   ///
   /// Note: Unless a subclass overrides this method, no turning will be done.
+  /// 
+  /// ignore: unused_element
   Animatable _bitmapTurnAnimation(
       Direction startDirection, Direction endDirection, double duration,
       {bool clockwise: true}) {

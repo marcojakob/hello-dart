@@ -30,7 +30,7 @@ abstract class Player extends Actor {
     // Check for a box. If there is a box, ensure it can be moved.
     Box box = world
         .getActorsInFront(x, y, direction)
-        .firstWhere((Actor a) => a is Box, orElse: () => null);
+        .firstWhere((Actor a) => a is Box, orElse: () => null) as Box;
 
     if (box != null) {
       // Check if the box can be pushed to the next field.
@@ -127,7 +127,7 @@ abstract class Player extends Actor {
     // Check for a box. If there is a box, ensure it can be moved.
     Box box = world
         .getActorsInFront(x, y, direction)
-        .firstWhere((Actor a) => a is Box, orElse: () => null);
+        .firstWhere((Actor a) => a is Box, orElse: () => null) as Box;
 
     if (box != null && !box.canMove(direction)) {
       return false;
@@ -169,6 +169,7 @@ abstract class Player extends Actor {
 
       world.queueAction((duration) {
         star._bitmapAddToWorld();
+        return null;
       });
     } else {
       say(messages.cantPutStar(), -1);
@@ -180,13 +181,14 @@ abstract class Player extends Actor {
   void removeStar() {
     Star star = world
         .getActorsAt(x, y)
-        .firstWhere((Actor a) => a is Star, orElse: () => null);
+        .firstWhere((Actor a) => a is Star, orElse: () => null) as Star;
 
     if (star != null) {
       world.actors.remove(star);
 
       world.queueAction((duration) {
         star._bitmapRemoveFromWorld();
+        return null;
       });
     } else {
       say(messages.cantRemoveStar(), -1);
@@ -235,6 +237,8 @@ abstract class Player extends Actor {
           speechBubble.removeFromParent();
         }, seconds);
       }
+
+      return null;
     });
   }
 

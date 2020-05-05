@@ -154,6 +154,7 @@ class World extends Sprite {
         // Stop execution after all queued actions have been processed.
         _actionQueue.add((spd) {
           _enterFrameSub.cancel();
+          return null;
         });
       } on PlayerException catch (e) {
         // Stop execution after all queued actions have been processed, then
@@ -161,6 +162,7 @@ class World extends Sprite {
         _actionQueue.add((spd) {
           _enterFrameSub.cancel();
           html.window.alert(e.toString());
+          return null;
         });
       }
 
@@ -374,7 +376,7 @@ class World extends Sprite {
       ..step = '1'
       ..onChange.listen((_) {
         int sliderValue =
-            100 - math.max(0, math.min(100, int.parse(slider.value)));
+            100 - math.max<int>(0, math.min<int>(100, int.parse(slider.value)));
 
         // Set the new speed.
         speed = _logSliderToValue(sliderValue);
@@ -448,7 +450,7 @@ class World extends Sprite {
         PlayerAction action = _actionQueue.removeFirst();
         try {
           // Only use 70% of the duration for the actual action to allow a break.
-          double actionDuration = speed * .7;
+          double actionDuration = speed.toDouble() * .7;
 
           // Execute the player action.
           _actionAnimatable = action(actionDuration);

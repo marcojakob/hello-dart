@@ -1,8 +1,12 @@
 # Changelog
 
+## Version 0.3.0 (2020-05-05)
+
+- Update to Dart 2.7 and above.
+
 ## Version 0.2.0 (2018-11-07)
 
-- Update to Dart 2
+- Update to Dart 2.
 
 ## Version 0.1.1 (2015-03-20)
 
