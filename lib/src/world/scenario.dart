@@ -279,7 +279,7 @@ class Scenario {
   /// The [directionCountdown] is used to count how many directions were tested.
   /// If it reaches 0 and no point has been found, null is returned.
   _Pair<Point<int>, String> _findOutlineUp(Point<int> p,
-      {int directionCountdown: 3}) {
+      {int directionCountdown = 3}) {
     if (directionCountdown > 0) {
       if (p.y > 0 && positions[p.y - 1][p.x] == Scenario.borderOrHole) {
         return _Pair(Point(p.x, p.y - 1), 'U');
@@ -298,7 +298,7 @@ class Scenario {
   /// The [directionCountdown] is used to count how many directions were tested.
   /// If it reaches 0 and no point has been found, null is returned.
   _Pair<Point<int>, String> _findOutlineRight(Point<int> p,
-      {int directionCountdown: 3}) {
+      {int directionCountdown = 3}) {
     if (directionCountdown > 0) {
       if (p.x + 1 < _width &&
           positions[p.y][p.x + 1] == Scenario.borderOrHole) {
@@ -318,7 +318,7 @@ class Scenario {
   /// The [directionCountdown] is used to count how many directions were tested.
   /// If it reaches 0 and no point has been found, null is returned.
   _Pair<Point<int>, String> _findOutlineDown(Point<int> p,
-      {int directionCountdown: 3}) {
+      {int directionCountdown = 3}) {
     if (directionCountdown > 0) {
       if (p.y + 1 < _height &&
           positions[p.y + 1][p.x] == Scenario.borderOrHole) {
@@ -338,7 +338,7 @@ class Scenario {
   /// The [directionCountdown] is used to count how many directions were tested.
   /// If it reaches 0 and no point has been found, null is returned.
   _Pair<Point<int>, String> _findOutlineLeft(Point<int> p,
-      {int directionCountdown: 3}) {
+      {int directionCountdown = 3}) {
     if (directionCountdown > 0) {
       if (p.x > 0 && positions[p.y][p.x - 1] == Scenario.borderOrHole) {
         return _Pair(Point(p.x - 1, p.y), 'L');

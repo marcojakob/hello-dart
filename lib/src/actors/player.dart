@@ -393,7 +393,7 @@ abstract class Player extends Actor {
   @override
   Animatable _bitmapTurnAnimation(
       Direction startDirection, Direction endDirection, double duration,
-      {bool clockwise: true}) {
+      {bool clockwise = true}) {
     List<BitmapData> endImages = world.resourceManager
         .getTextureAtlas('character')
         .getBitmapDatas('${endDirection}');

@@ -127,7 +127,7 @@ abstract class Actor {
   /// ignore: unused_element
   Animatable _bitmapTurnAnimation(
       Direction startDirection, Direction endDirection, double duration,
-      {bool clockwise: true}) {
+      {bool clockwise = true}) {
     // Do nothing.
     return DelayedCall(() {}, 0);
   }

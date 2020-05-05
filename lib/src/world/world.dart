@@ -511,7 +511,7 @@ class BitmapZ extends Bitmap implements DisplayObjectZ {
   @override
   int zIndex = 0;
 
-  BitmapZ([BitmapData bitmapData = null]) : super(bitmapData);
+  BitmapZ([BitmapData bitmapData]) : super(bitmapData);
 }
 
 /// Extends [FlipBook] to have a z-order.

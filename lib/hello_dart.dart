@@ -59,7 +59,6 @@ Messages messages = Messages();
 ///
 /// The [speed] is the duration between the execution of actions (in seconds).
 void createWorld(String scenarioFile, Player player, [num speed = 1]) {
-
   World world = World(player, speed);
 
   // Initialize the world.
