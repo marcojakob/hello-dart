@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.3.3 (2020-05-12)
+
+- Fix scenario 3.03.
+
 ## Version 0.3.2 (2020-05-05)
 
 - Fix more Dart linter errors.
